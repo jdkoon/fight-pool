@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fight Pool — Live Standings</title>
+<style>
+  :root{
+    --bg:#0f1216; --panel:#171c23; --panel2:#1e242d; --line:#2a323d;
+    --ink:#eef2f7; --muted:#9aa7b6; --accent:#e8b93b; --accent2:#4aa3ff; --win:#37c26b;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; --radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:1100px;margin:0 auto;padding:20px 16px 70px}
+  header.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between;margin-bottom:14px}
+  h1{font-size:22px;margin:0}
+  .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  .live{display:inline-flex;align-items:center;gap:6px;background:#12351f;color:#57d98a;border:1px solid #1e5c37;border-radius:999px;padding:4px 11px;font-size:12px;font-weight:700}
+  .dot{width:8px;height:8px;border-radius:50%;background:#57d98a;animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+  .card h2{font-size:14px;margin:0 0 10px;letter-spacing:.3px;text-transform:uppercase;color:var(--muted)}
+  .kpi{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .kpi .box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:110px;flex:1}
+  .kpi .lab{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .kpi .val{font-size:22px;font-weight:700;margin-top:2px}
+  table{border-collapse:collapse;width:100%}
+  .board td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+  .board .rank{width:54px;text-align:center;font-size:20px}
+  .board .who{font-weight:700;font-size:17px}
+  .board .barcell{width:46%}
+  .board .pts{font-family:var(--mono);font-weight:700;font-size:17px;text-align:right}
+  .bar{height:12px;border-radius:6px;min-width:3px;background:linear-gradient(90deg,#4aa3ff,#7bc0ff);transition:width .6s ease}
+  .board tr.p1 .bar{background:linear-gradient(90deg,#e8b93b,#f7dd86)}
+  .board tr.p2 .bar{background:linear-gradient(90deg,#aab6c4,#d7dee6)}
+  .board tr.p3 .bar{background:linear-gradient(90deg,#cd8b52,#e0a877)}
+  .board tr.p1 .who{color:#f2d06b}
+  .scroll{overflow:auto;border:1px solid var(--line);border-radius:10px}
+  .grid th,.grid td{padding:7px 9px;border-bottom:1px solid var(--line);white-space:nowrap;font-size:13px;text-align:left}
+  .grid th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0;background:var(--panel)}
+  .grid .fightcol{position:sticky;left:0;background:var(--panel);font-weight:600;min-width:150px}
+  .hitwin{color:var(--win);font-weight:700}
+  .miss{color:var(--muted);opacity:.6}
+  .miniodds{font-family:var(--mono);font-size:11px}
+  .res{font-family:var(--mono);font-size:12px;color:var(--accent)}
+  .tbd{color:var(--muted);font-style:italic}
+  .updated{color:var(--muted);font-size:12px}
+  .btn{appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600}
+  .btn:hover{border-color:#3a4655}
+  .foot{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
+  .err{background:#3a1c1c;border:1px solid #6b2b2b;color:#f0b4b4;padding:12px 14px;border-radius:10px;margin-bottom:16px;display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1 id="eventName">Fight Pool</h1>
+      <div class="sub">Odds-weighted standings · updates automatically</div>
+    </div>
+    <div style="text-align:right">
+      <div class="live"><span class="dot"></span> LIVE</div>
+      <div class="updated" id="updated">—</div>
+      <button class="btn" id="refresh" style="margin-top:6px">↻ Refresh now</button>
+    </div>
+  </header>
+
+  <div class="err" id="err"></div>
+
+  <div class="kpi" id="kpi"></div>
+
+  <div class="card">
+    <h2>Standings</h2>
+    <table class="board"><tbody id="boardBody"></tbody></table>
+  </div>
+
+  <div class="card">
+    <h2>Who picked whom</h2>
+    <div class="scroll"><table class="grid" id="grid"></table></div>
+  </div>
+
+  <div class="foot" id="foot">Live results pulled from ESPN · scoring is odds-weighted</div>
+</div>
+
+<script>
+"use strict";
+let CONFIG=null, RESULTS=null;
+
+/* scoring (identical to the setup tool, verified vs the spreadsheet) */
+function impliedProb(ml){ml=Number(ml);if(isNaN(ml))return null;if(ml===0)return 0.5;return ml>0?100/(ml+100):(-ml)/((-ml)+100);}
+function multiplier(ml){const p=impliedProb(ml);if(p===null||p===0)return 0;return 1/(2*p);}
+function winnerML(fi){const r=RESULTS.fights[fi];if(!r||!r.w)return null;return r.w==="a"?CONFIG.fights[fi].mlA:CONFIG.fights[fi].mlB;}
+function winPointsFor(fi){const ml=winnerML(fi);if(ml===null)return 0;return multiplier(ml)*Number(CONFIG.winMode||1);}
+function schedRounds(fi){const r=RESULTS.fights[fi]&&RESULTS.fights[fi].rounds;const c=CONFIG.fights[fi]&&CONFIG.fights[fi].rounds;return Number(r||c)===5?5:3;}
+function bonusPoints(round,N,maxBonus){if(round==="DEC")return 0;const r=Number(round);if(!r||r<1)return 0;const rr=Math.min(r,N);return maxBonus*(N-rr+1)/N;}
+function bonusFor(fi){const r=RESULTS.fights[fi];if(!r||!r.w)return 0;const mode=CONFIG.bonusMode||"weighted";if(mode==="off")return 0;const N=schedRounds(fi);const pts=bonusPoints(r.r,N,Number(CONFIG.maxBonus!=null?CONFIG.maxBonus:3));if(mode==="flat")return pts;return pts*multiplier(winnerML(fi));}
+function cellPoints(pi,fi){const r=RESULTS.fights[fi];if(!r||!r.w)return 0;const pick=CONFIG.picks[pi]&&CONFIG.picks[pi][fi];if(!pick||pick!==r.w)return 0;return winPointsFor(fi)+bonusFor(fi);}
+function playerTotal(pi){let t=0;CONFIG.fights.forEach((_,fi)=>{t+=cellPoints(pi,fi);});return t;}
+function fmt2(n){return (Math.round(n*100)/100).toFixed(2);}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function medal(r){return r===1?"🥇":r===2?"🥈":r===3?"🥉":("#"+r);}
+
+function standings(){
+  const arr=CONFIG.players.map((n,i)=>({i,n,pts:playerTotal(i)}));
+  arr.sort((a,b)=>b.pts-a.pts);
+  let rank=0,last=null,seen=0;
+  arr.forEach(o=>{seen++;if(last===null||o.pts<last-1e-9){rank=seen;last=o.pts;}o.rank=rank;});
+  return arr;
+}
+function render(){
+  document.getElementById("eventName").textContent=CONFIG.event||"Fight Pool";
+  const arr=standings();
+  const max=Math.max(1,...arr.map(a=>a.pts));
+  const scored=CONFIG.fights.filter((_,fi)=>RESULTS.fights[fi]&&RESULTS.fights[fi].w).length;
+  document.getElementById("kpi").innerHTML=`
+    <div class="box"><div class="lab">Players</div><div class="val">${CONFIG.players.length}</div></div>
+    <div class="box"><div class="lab">Fights done</div><div class="val">${scored}/${CONFIG.fights.length}</div></div>
+    <div class="box"><div class="lab">Leader</div><div class="val">${arr[0]?esc(arr[0].n):"—"}</div></div>
+    <div class="box"><div class="lab">Top score</div><div class="val" style="font-family:var(--mono)">${arr[0]?fmt2(arr[0].pts):"0"}</div></div>`;
+  document.getElementById("boardBody").innerHTML=arr.map(o=>{
+    const cls=o.rank===1?"p1":o.rank===2?"p2":o.rank===3?"p3":"";
+    const w=Math.max(3,(o.pts/max)*100);
+    return `<tr class="${cls}"><td class="rank">${medal(o.rank)}</td><td class="who">${esc(o.n)}</td><td class="barcell"><div class="bar" style="width:${w}%"></div></td><td class="pts">${fmt2(o.pts)}</td></tr>`;
+  }).join("");
+  // grid
+  const g=document.getElementById("grid");
+  let head=`<tr><th class="fightcol">Fight</th>`+CONFIG.players.map(p=>`<th>${esc(p)}</th>`).join("")+`<th>Result</th></tr>`;
+  let rows=CONFIG.fights.map((f,fi)=>{
+    const r=RESULTS.fights[fi]||{};
+    const cells=CONFIG.players.map((_,pi)=>{
+      const pick=CONFIG.picks[pi]&&CONFIG.picks[pi][fi];
+      if(!pick)return `<td class="miss">—</td>`;
+      const name=pick==="a"?f.a:f.b;
+      const correct=r.w&&pick===r.w;
+      const pts=cellPoints(pi,fi);
+      return `<td class="${correct?'hitwin':'miss'}">${esc(name)}${correct?` <span class="miniodds">+${fmt2(pts)}</span>`:""}</td>`;
+    }).join("");
+    let resTxt;
+    if(!r.w){resTxt=`<span class="tbd">TBD</span>`;}
+    else{const wn=r.w==="a"?f.a:f.b;const rd=r.r&&r.r!=="DEC"?`R${r.r}`:"DEC";resTxt=`<span class="res">${esc(wn)} · ${rd}</span>`;}
+    return `<tr><td class="fightcol">${esc(f.a)} vs ${esc(f.b)}</td>${cells}<td>${resTxt}</td></tr>`;
+  }).join("");
+  let totals=`<tr><td class="fightcol">TOTAL</td>`+CONFIG.players.map((_,pi)=>`<td class="miniodds" style="font-weight:700;color:var(--ink)">${fmt2(playerTotal(pi))}</td>`).join("")+`<td></td></tr>`;
+  g.innerHTML=head+rows+totals;
+  const when=RESULTS.generatedAt?new Date(RESULTS.generatedAt):null;
+  document.getElementById("updated").textContent=when?("Updated "+when.toLocaleString()):"Awaiting first update";
+}
+
+async function load(){
+  try{
+    const bust="?t="+Date.now();
+    const [c,r]=await Promise.all([
+      fetch("config.json"+bust).then(x=>{if(!x.ok)throw new Error("config.json "+x.status);return x.json();}),
+      fetch("results.json"+bust).then(x=>x.ok?x.json():{generatedAt:null,fights:{}}).catch(()=>({generatedAt:null,fights:{}}))
+    ]);
+    CONFIG=c; RESULTS=r&&r.fights?r:{generatedAt:null,fights:{}};
+    document.getElementById("err").style.display="none";
+    render();
+  }catch(e){
+    const el=document.getElementById("err");
+    el.style.display="block";
+    el.textContent="Couldn't load data: "+e.message+". If you're opening this file directly, results load only when served from a web host (that's normal).";
+  }
+}
+document.getElementById("refresh").onclick=load;
+load();
+setInterval(load,30000); // auto-refresh every 30s
+</script>
+</body>
+</html>

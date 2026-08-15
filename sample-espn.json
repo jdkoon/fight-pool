@@ -1,0 +1,18 @@
+{ "events": [ { "competitions": [
+  { "status": {"period":2,"type":{"completed":true,"detail":"Final"}},
+    "details":[{"type":{"text":"Takedown"}},{"type":{"text":"Unofficial Winner KO/TKO"}}],
+    "competitors":[{"winner":true,"athlete":{"lastName":"Morales","fullName":"Joseph Morales"}},
+                   {"winner":false,"athlete":{"lastName":"Idiris","fullName":"Alibi Idiris"}}] },
+  { "status": {"period":3,"type":{"completed":true,"detail":"Final"}},
+    "details":[{"type":{"text":"Unofficial Winner Decision"}}],
+    "competitors":[{"winner":false,"athlete":{"lastName":"Barbosa","fullName":"Raoni Barbosa"}},
+                   {"winner":true,"athlete":{"lastName":"Silva","fullName":"Joyce Silva"}}] },
+  { "status": {"period":2,"type":{"completed":true,"detail":"Final"}},
+    "details":[{"type":{"text":"Unofficial Winner Submission"}}],
+    "competitors":[{"winner":false,"athlete":{"lastName":"Nolan","fullName":"Jared Nolan"}},
+                   {"winner":true,"athlete":{"lastName":"Susurkaev","fullName":"Baisangur Susurkaev"}}] },
+  { "status": {"period":5,"type":{"completed":true,"detail":"Final"}},
+    "details":[{"type":{"text":"Unofficial Winner Decision"}}],
+    "competitors":[{"winner":false,"athlete":{"lastName":"Du Plessis","fullName":"Dricus Du Plessis"}},
+                   {"winner":true,"athlete":{"lastName":"Chimaev","fullName":"Khamzat Chimaev"}}] }
+] } ] }

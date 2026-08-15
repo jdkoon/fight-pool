@@ -1,0 +1,122 @@
+{
+  "event": "UFC 330 — Makhachev vs. Machado Garry",
+  "espnLeague": "ufc",
+  "espnDate": "20260815",
+  "winMode": 3,
+  "bonusMode": "weighted",
+  "players": [
+    "Tyler",
+    "Ian",
+    "Bobby",
+    "Logan",
+    "Nick",
+    "John",
+    "Diaz",
+    "Ben",
+    "Matt",
+    "Gerry",
+    "Player 11",
+    "Player 12"
+  ],
+  "fights": [
+    {
+      "a": "Makhachev",
+      "b": "Garry",
+      "mlA": -350,
+      "mlB": 275,
+      "rounds": 5
+    },
+    {
+      "a": "Dern",
+      "b": "Robertson",
+      "mlA": -220,
+      "mlB": 180,
+      "rounds": 5
+    },
+    {
+      "a": "Turner",
+      "b": "Fernandes",
+      "mlA": -160,
+      "mlB": 135,
+      "rounds": 3
+    },
+    {
+      "a": "Malik",
+      "b": "Stoltzfus",
+      "mlA": -650,
+      "mlB": 475,
+      "rounds": 3
+    },
+    {
+      "a": "Barboza",
+      "b": "Ribovics",
+      "mlA": 425,
+      "mlB": -575,
+      "rounds": 3
+    },
+    {
+      "a": "Njokuani",
+      "b": "Alverez",
+      "mlA": 235,
+      "mlB": -300,
+      "rounds": 3
+    },
+    {
+      "a": "Johnson",
+      "b": "Chapolin",
+      "mlA": 0,
+      "mlB": 0,
+      "rounds": 3
+    },
+    {
+      "a": "Johnson",
+      "b": "Mcconico",
+      "mlA": -340,
+      "mlB": 195,
+      "rounds": 3
+    },
+    {
+      "a": "Luque",
+      "b": "Gore",
+      "mlA": 100,
+      "mlB": -120,
+      "rounds": 3
+    },
+    {
+      "a": "Tobias",
+      "b": "Fernando",
+      "mlA": 240,
+      "mlB": -300,
+      "rounds": 3
+    },
+    {
+      "a": "Magny",
+      "b": "Brahimaj",
+      "mlA": 110,
+      "mlB": -130,
+      "rounds": 3
+    },
+    {
+      "a": "Wells",
+      "b": "Orolabai",
+      "mlA": 600,
+      "mlB": -900,
+      "rounds": 3
+    }
+  ],
+  "picks": {
+    "0": {},
+    "1": {},
+    "2": {},
+    "3": {},
+    "4": {},
+    "5": {},
+    "6": {},
+    "7": {},
+    "8": {},
+    "9": {},
+    "10": {},
+    "11": {}
+  },
+  "maxBonus": 3
+}

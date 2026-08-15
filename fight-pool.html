@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fantasy Fight Pool</title>
+<style>
+  :root{
+    --bg:#0f1216; --panel:#171c23; --panel2:#1e242d; --line:#2a323d;
+    --ink:#eef2f7; --muted:#9aa7b6; --accent:#e8b93b; --accent2:#4aa3ff;
+    --win:#37c26b; --loss:#3a4655; --pill:#232b35;
+    --gold:#e8b93b; --silver:#c7d0da; --bronze:#cd8b52;
+    --radius:12px; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+  a{color:var(--accent2)}
+  .wrap{max-width:1200px;margin:0 auto;padding:20px 18px 80px}
+  header.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;margin-bottom:6px}
+  h1{font-size:22px;margin:0;letter-spacing:.2px}
+  h1 .sub{color:var(--muted);font-weight:500;font-size:13px;display:block;margin-top:2px}
+  .event-name{background:transparent;border:none;color:var(--ink);font-size:22px;font-weight:700;width:min(520px,60vw);padding:2px 4px;border-bottom:1px dashed transparent}
+  .event-name:focus{outline:none;border-bottom:1px dashed var(--line)}
+  .tabs{display:flex;gap:4px;flex-wrap:wrap;margin:14px 0 18px;background:var(--panel);padding:5px;border-radius:12px;border:1px solid var(--line)}
+  .tab{appearance:none;border:none;background:transparent;color:var(--muted);padding:9px 15px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600}
+  .tab.active{background:var(--panel2);color:var(--ink);box-shadow:0 1px 0 rgba(0,0,0,.3)}
+  .tab:hover{color:var(--ink)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 16px;margin-bottom:16px}
+  .card h2{font-size:15px;margin:0 0 4px;letter-spacing:.3px}
+  .card p.hint{color:var(--muted);font-size:13px;margin:0 0 14px}
+  .btn{appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--ink);
+    padding:9px 14px;border-radius:9px;cursor:pointer;font-size:13.5px;font-weight:600}
+  .btn:hover{border-color:#3a4655}
+  .btn.primary{background:var(--accent);color:#20180a;border-color:var(--accent)}
+  .btn.primary:hover{filter:brightness(1.05)}
+  .btn.ghost{background:transparent}
+  .btn.sm{padding:5px 9px;font-size:12px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .spacer{flex:1}
+  table{border-collapse:collapse;width:100%}
+  th,td{padding:7px 9px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+  th{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;position:sticky;top:0;background:var(--panel);z-index:2}
+  input,select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 8px;font-size:13.5px;font-family:inherit}
+  input:focus,select:focus{outline:none;border-color:var(--accent2)}
+  input.ml{width:78px;font-family:var(--mono);text-align:center}
+  .scroll{overflow:auto;border:1px solid var(--line);border-radius:10px}
+  .grid-table td,.grid-table th{white-space:nowrap;font-size:13px}
+  .grid-table th.pl{background:var(--panel2)}
+  .grid-table .fightcol{position:sticky;left:0;background:var(--panel);font-weight:600;z-index:1;min-width:150px}
+  .grid-table select{width:100%;min-width:112px}
+  .hitwin{color:var(--win);font-weight:700}
+  .hitloss{color:var(--muted);opacity:.65}
+  .mult{font-family:var(--mono);color:var(--accent);font-size:12px}
+  .fav{color:var(--muted)}
+  .dog{color:var(--accent)}
+  .board td{border-bottom:1px solid var(--line)}
+  .board .rank{font-size:20px;width:52px;text-align:center}
+  .board .who{font-weight:700;font-size:16px}
+  .board .pts{font-family:var(--mono);font-weight:700;font-size:16px;text-align:right;color:var(--ink)}
+  .board .barcell{width:45%}
+  .bar{height:12px;border-radius:6px;background:linear-gradient(90deg,var(--accent),#f2d06b);min-width:2px}
+  .board tr.p1 .bar{background:linear-gradient(90deg,#e8b93b,#f7dd86)}
+  .board tr.p2 .bar{background:linear-gradient(90deg,#aab6c4,#d7dee6)}
+  .board tr.p3 .bar{background:linear-gradient(90deg,#cd8b52,#e0a877)}
+  .board tr:not(.p1):not(.p2):not(.p3) .bar{background:linear-gradient(90deg,#4aa3ff,#7bc0ff)}
+  .medal{font-size:20px}
+  .tag{display:inline-block;background:var(--pill);border:1px solid var(--line);border-radius:999px;padding:2px 9px;font-size:11.5px;color:var(--muted);margin-left:6px}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:760px){.split{grid-template-columns:1fr}}
+  .roundfactors{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+  .rf{display:flex;flex-direction:column;gap:3px}
+  .rf label{font-size:11px;color:var(--muted)}
+  .rf input{width:66px;text-align:center;font-family:var(--mono)}
+  .note{background:var(--panel2);border-left:3px solid var(--accent);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--muted);margin:10px 0}
+  .note b{color:var(--ink)}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--accent);color:#20180a;
+    padding:11px 18px;border-radius:10px;font-weight:700;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:99}
+  .toast.show{opacity:1}
+  .fightline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .vs{color:var(--muted);font-size:12px}
+  .winnerpick{display:flex;gap:6px;align-items:center}
+  .miniodds{font-size:11px;color:var(--muted);font-family:var(--mono)}
+  .viewbadge{display:none;background:var(--accent2);color:#04203f;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700}
+  body.viewmode .editonly{display:none!important}
+  body.viewmode .tabs .tab[data-tab="setup"],
+  body.viewmode .tabs .tab[data-tab="picks"],
+  body.viewmode .tabs .tab[data-tab="results"]{display:none}
+  body.viewmode .viewbadge{display:inline-block}
+  .del{color:#e06a6a;cursor:pointer;font-weight:700;padding:0 6px}
+  .foot{color:var(--muted);font-size:12px;text-align:center;margin-top:26px}
+  .kpi{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .kpi .box{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:120px}
+  .kpi .box .lab{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .kpi .box .val{font-size:20px;font-weight:700;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <input class="event-name" id="eventName" value="Fantasy Fight Pool" aria-label="Event name">
+      <span class="sub">Odds-weighted pick'em — enter picks once, share the standings.</span>
+    </div>
+    <div class="row">
+      <span class="viewbadge">👁 Results view (read-only)</span>
+      <button class="btn editonly" id="btnShareView">🔗 Copy results link</button>
+      <button class="btn editonly" id="btnShareEdit">✏️ Copy edit link</button>
+      <button class="btn sm editonly" id="btnPng">⬇ PNG</button>
+    </div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="board">🏆 Leaderboard</button>
+    <button class="tab editonly" data-tab="picks">📋 Picks Grid</button>
+    <button class="tab editonly" data-tab="results">✅ Results</button>
+    <button class="tab editonly" data-tab="setup">⚙️ Card &amp; Odds</button>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <section class="panel-tab" id="tab-board">
+    <div class="card">
+      <div class="kpi" id="kpi"></div>
+      <table class="board"><tbody id="boardBody"></tbody></table>
+    </div>
+    <div class="card">
+      <h2>Who picked whom</h2>
+      <p class="hint">Green = correct pick (fighter won). Numbers are points earned on that fight.</p>
+      <div class="scroll"><table class="grid-table" id="resultGrid"></table></div>
+    </div>
+  </section>
+
+  <!-- PICKS GRID -->
+  <section class="panel-tab editonly" id="tab-picks" style="display:none">
+    <div class="card">
+      <div class="row" style="margin-bottom:12px">
+        <h2 style="margin:0">Picks grid</h2>
+        <span class="tag">Pick the winner (last name) for each fighter, per person</span>
+        <div class="spacer"></div>
+        <button class="btn sm" id="addPlayer">+ Add person</button>
+      </div>
+      <div class="scroll"><table class="grid-table" id="picksGrid"></table></div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="panel-tab editonly" id="tab-results" style="display:none">
+    <div class="card">
+      <h2>Enter fight results</h2>
+      <p class="hint">Pick the actual winner and the round it ended. This is the only thing you enter after the event — everyone's scores update automatically.</p>
+      <table id="resultsEntry"></table>
+    </div>
+  </section>
+
+  <!-- SETUP -->
+  <section class="panel-tab editonly" id="tab-setup" style="display:none">
+    <div class="card">
+      <div class="row" style="margin-bottom:10px">
+        <h2 style="margin:0">Fight card &amp; odds</h2>
+        <div class="spacer"></div>
+        <button class="btn sm" id="addFight">+ Add fight</button>
+      </div>
+      <p class="hint">Enter each fighter's American moneyline (e.g. <b>+375</b> or <b>-500</b>). The multiplier is computed with your formula: <span class="mult">1 / (2 × implied probability)</span> — underdogs pay more.</p>
+      <table id="oddsTable"></table>
+    </div>
+
+    <div class="card">
+      <h2>Scoring rules</h2>
+      <div class="note" id="fairnessNote"></div>
+      <div class="split">
+        <div>
+          <label style="font-size:13px;color:var(--muted)">Win points<br>
+            <select id="winMode" style="margin-top:5px">
+              <option value="3">Win = 3 pts × multiplier (your scoring)</option>
+              <option value="1">Win = multiplier only (×1)</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label style="font-size:13px;color:var(--muted)">Round-finish bonus<br>
+            <select id="bonusMode" style="margin-top:5px">
+              <option value="weighted">Odds-weighted (fair) — bonus = multiplier × factor</option>
+              <option value="flat">Flat points (your old way)</option>
+              <option value="off">No round bonus</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <label style="font-size:13px;color:var(--muted)">Max bonus (round-1 finish, before multiplier)
+          <input id="maxBonus" value="3" style="width:70px;margin-left:8px;text-align:center;font-family:var(--mono)">
+        </label>
+        <div id="taperNote" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Roster &amp; data</h2>
+      <div class="row">
+        <button class="btn sm" id="loadCurrentBtn">Load UFC 330 card</button>
+        <button class="btn sm" id="loadExample">Load UFC 319 (demo)</button>
+        <button class="btn sm" id="clearPicks">Clear all picks</button>
+        <button class="btn sm" id="resetAll">Reset everything</button>
+        <button class="btn sm" id="exportJson">Export data (JSON)</button>
+        <label class="btn sm" style="cursor:pointer">Import JSON<input type="file" id="importJson" accept="application/json" hidden></label>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">Made for John's fight pool · self-contained · no login, no server · share via link</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+"use strict";
+
+/* ---------- state ---------- */
+const ROUNDS = ["DEC","1","2","3","4","5"];
+function blankState(){
+  return {
+    event:"Fantasy Fight Pool",
+    winMode:3,            // win = 3 * multiplier (matches the "Points for Win" column)
+    bonusMode:"weighted", // weighted | flat | off
+    maxBonus:3,           // round-1 finish bonus; tapers linearly to 0 by the final round (3- or 5-round aware)
+    players:["Tyler","Ian","Bobby","Logan","Nick","John","Diaz","Ben","Matt","Gerry","Player 11","Player 12"],
+    fights:[], // {a,b,mlA,mlB}
+    picks:{},  // picks[pIndex][fIndex] = 'a'|'b'
+    results:{} // results[fIndex] = {w:'a'|'b'|'', r:'DEC'|'1'...}
+  };
+}
+let S = blankState();
+
+/* ---------- example (his last card) ---------- */
+const EXAMPLE_FIGHTS = [
+  ["Morales","Idris",375,-500],
+  ["Barbosa","Silva",165,-190],
+  ["Barboza","Klose",-116,-104],
+  ["Hooper","Hernandez",-365,300],
+  ["Andrade","Godinez",120,-140],
+  ["Meerschaert","Oleksiejczuk",170,-200],
+  ["Nolan","Susurkaev",700,-1300],
+  ["Elliot","Asakura",235,-275],
+  ["Cannonier","Page",170,-200],
+  ["Neal","Prates",170,-200],
+  ["Pico","Murphy",-170,145],
+  ["Du Plessis","Chimaev",215,-255]
+];
+// pick side per player per fight (order: Tyler,Ian,Bobby,Logan,Nick,John,Diaz,Ben,Matt,Gerry)
+const EXAMPLE_PICKS = [
+  "bbbbbbbbaa", // Morales/Idris  (a=Morales)
+  "baabbababa", // Barbosa/Silva
+  "ababaababa", // Barboza/Klose
+  "aaaabaaaba", // Hooper/Hernandez
+  "bbaabaaaab", // Andrade/Godinez
+  "aaaabababa", // Meerschaert/Olek
+  "babbabbbba", // Nolan/Susurkaev
+  "bbbbaababb", // Elliot/Asakura
+  "abbbabbbaa", // Cannonier/Page
+  "aabbbabaab", // Neal/Prates
+  "baabaababb", // Pico/Murphy
+  "baabbbabaa"  // DuPlessis/Chimaev
+];
+function loadExample(){
+  S = blankState();
+  S.event="UFC — Last Event (example data)";
+  S.players=["Tyler","Ian","Bobby","Logan","Nick","John","Diaz","Ben","Matt","Gerry"];
+  S.fights = EXAMPLE_FIGHTS.map(f=>({a:f[0],b:f[1],mlA:f[2],mlB:f[3]}));
+  S.picks={};
+  for(let p=0;p<10;p++){ S.picks[p]={}; }
+  EXAMPLE_PICKS.forEach((row,fi)=>{
+    row.split("").forEach((ch,pi)=>{ S.picks[pi][fi]= (ch==="a"?"a":"b"); });
+  });
+  S.results={};
+  S.fights.forEach((_,fi)=>{ S.results[fi]={w:"a",r:"DEC"}; }); // first-named won every fight in his sheet
+  render();
+}
+
+/* ---------- current card: UFC 330 (Aug 15 2026) ---------- */
+const CURRENT_FIGHTS = [
+  ["Makhachev","Garry",-350,275],
+  ["Dern","Robertson",-220,180],
+  ["Turner","Fernandes",-160,135],
+  ["Malik","Stoltzfus",-650,475],
+  ["Barboza","Ribovics",425,-575],
+  ["Njokuani","Alverez",235,-300],
+  ["Johnson","Chapolin",0,0],
+  ["Johnson","Mcconico",-340,195],
+  ["Luque","Gore",100,-120],
+  ["Tobias","Fernando",240,-300],
+  ["Magny","Brahimaj",110,-130],
+  ["Wells","Orolabai",600,-900]
+];
+function loadCurrent(){
+  S=blankState();
+  S.event="UFC 330 — Makhachev vs. Machado Garry";
+  S.espnLeague="ufc"; S.espnDate="20260815";
+  S.players=["Tyler","Ian","Bobby","Logan","Nick","John","Diaz","Ben","Matt","Gerry","Player 11","Player 12"];
+  S.fights=CURRENT_FIGHTS.map(f=>({a:f[0],b:f[1],mlA:f[2],mlB:f[3]}));
+  S.fights.forEach((f,i)=>{ f.rounds = (i<2?5:3); }); // Makhachev/Garry & Dern/Robertson are 5-round title fights
+  S.picks={}; S.players.forEach((_,pi)=>{ S.picks[pi]={}; });
+  S.results={}; S.fights.forEach((_,fi)=>{ S.results[fi]={w:"",r:"DEC"}; });
+  render(); setTab("picks");
+}
+
+/* ---------- odds math (John's formula) ---------- */
+function impliedProb(ml){
+  ml=Number(ml);
+  if(isNaN(ml)) return null;
+  if(ml===0) return 1/2;            // even / pick'em -> multiplier 1 (3 pts)
+  return ml>0 ? 100/(ml+100) : (-ml)/((-ml)+100);
+}
+function multiplier(ml){
+  const p=impliedProb(ml);
+  if(p===null||p===0) return 0;
+  return 1/(2*p);
+}
+function isDog(mlSelf){ return Number(mlSelf)>0; }
+
+/* ---------- scoring ---------- */
+function winPointsFor(fi){ // points for correctly picking winner of fight fi (before bonus)
+  const r=S.results[fi]; if(!r||!r.w) return 0;
+  const ml = r.w==="a" ? S.fights[fi].mlA : S.fights[fi].mlB;
+  return multiplier(ml)*Number(S.winMode||1);
+}
+function schedRounds(fi){ return (S.fights[fi] && Number(S.fights[fi].rounds)===5) ? 5 : 3; }
+function bonusPoints(round,N,maxBonus){ if(round==="DEC") return 0; const r=Number(round); if(!r||r<1) return 0; const rr=Math.min(r,N); return maxBonus*(N-rr+1)/N; }
+function bonusFor(fi){ // round-finish bonus added to a correct pick (round-aware linear taper)
+  const r=S.results[fi]; if(!r||!r.w) return 0;
+  if(S.bonusMode==="off") return 0;
+  const N=schedRounds(fi);
+  const pts=bonusPoints(r.r, N, Number(S.maxBonus!=null?S.maxBonus:3));
+  if(S.bonusMode==="flat") return pts;                   // points only
+  const ml = r.w==="a" ? S.fights[fi].mlA : S.fights[fi].mlB;
+  return pts*multiplier(ml);                             // weighted by odds
+}
+function cellPoints(pi,fi){ // points a player earns on a fight
+  const r=S.results[fi]; if(!r||!r.w) return 0;
+  const pick=S.picks[pi]&&S.picks[pi][fi];
+  if(!pick) return 0;
+  if(pick!==r.w) return 0;
+  return winPointsFor(fi)+bonusFor(fi);
+}
+function playerTotal(pi){
+  let t=0; S.fights.forEach((_,fi)=>{ t+=cellPoints(pi,fi); }); return t;
+}
+function fmt(n){ return (Math.round(n*1000)/1000).toString(); }
+function fmt2(n){ return (Math.round(n*100)/100).toFixed(2); }
+
+/* ---------- rendering ---------- */
+const $=s=>document.querySelector(s);
+function render(){
+  $("#eventName").value=S.event;
+  renderBoard(); renderPicks(); renderResults(); renderOdds();
+  renderResultGrid(); renderRules();
+  writeHash();
+}
+
+function medal(rank){ return rank===1?"🥇":rank===2?"🥈":rank===3?"🥉":("#"+rank); }
+
+function standings(){
+  const arr=S.players.map((n,i)=>({i,n,pts:playerTotal(i)}));
+  arr.sort((a,b)=>b.pts-a.pts);
+  let rank=0,last=null,seen=0;
+  arr.forEach(o=>{ seen++; if(last===null||o.pts<last-1e-9){rank=seen;last=o.pts;} o.rank=rank;});
+  return arr;
+}
+function renderBoard(){
+  const arr=standings();
+  const max=Math.max(1,...arr.map(a=>a.pts));
+  const fightsScored=S.fights.filter((_,fi)=>S.results[fi]&&S.results[fi].w).length;
+  $("#kpi").innerHTML=`
+    <div class="box"><div class="lab">Players</div><div class="val">${S.players.length}</div></div>
+    <div class="box"><div class="lab">Fights</div><div class="val">${S.fights.length}</div></div>
+    <div class="box"><div class="lab">Scored</div><div class="val">${fightsScored}/${S.fights.length}</div></div>
+    <div class="box"><div class="lab">Leader</div><div class="val">${arr[0]?arr[0].n:"—"}</div></div>`;
+  $("#boardBody").innerHTML=arr.map(o=>{
+    const cls=o.rank===1?"p1":o.rank===2?"p2":o.rank===3?"p3":"";
+    const w=Math.max(2,(o.pts/max)*100);
+    return `<tr class="${cls}">
+      <td class="rank"><span class="medal">${medal(o.rank)}</span></td>
+      <td class="who">${esc(o.n)}</td>
+      <td class="barcell"><div class="bar" style="width:${w}%"></div></td>
+      <td class="pts">${fmt2(o.pts)}</td></tr>`;
+  }).join("");
+}
+
+function renderPicks(){
+  const t=$("#picksGrid");
+  let head=`<tr><th class="fightcol">Fight</th>`+
+    S.players.map((p,pi)=>`<th class="pl"><input value="${esc(p)}" data-pl="${pi}" style="width:96px;background:transparent;border:none;color:var(--ink);font-weight:700"> <span class="del" data-delpl="${pi}">×</span></th>`).join("")+`</tr>`;
+  let rows=S.fights.map((f,fi)=>{
+    const cells=S.players.map((_,pi)=>{
+      const v=(S.picks[pi]&&S.picks[pi][fi])||"";
+      return `<td><select data-pick data-pi="${pi}" data-fi="${fi}">
+        <option value="" ${v===""?"selected":""}>—</option>
+        <option value="a" ${v==="a"?"selected":""}>${esc(f.a)}</option>
+        <option value="b" ${v==="b"?"selected":""}>${esc(f.b)}</option>
+      </select></td>`;
+    }).join("");
+    return `<tr><td class="fightcol">${esc(f.a)} <span class="vs">vs</span> ${esc(f.b)}</td>${cells}</tr>`;
+  }).join("");
+  t.innerHTML=head+rows;
+}
+
+function renderResults(){
+  const t=$("#resultsEntry");
+  t.innerHTML=`<tr><th>Fight</th><th>Winner</th><th>Finish round</th><th>Win pts</th><th>Bonus</th></tr>`+
+   S.fights.map((f,fi)=>{
+    const r=S.results[fi]||{w:"",r:"DEC"};
+    return `<tr>
+      <td>${esc(f.a)} <span class="vs">vs</span> ${esc(f.b)}</td>
+      <td><select data-res="w" data-fi="${fi}">
+        <option value="" ${r.w===""?"selected":""}>— TBD —</option>
+        <option value="a" ${r.w==="a"?"selected":""}>${esc(f.a)}</option>
+        <option value="b" ${r.w==="b"?"selected":""}>${esc(f.b)}</option></select></td>
+      <td><select data-res="r" data-fi="${fi}">
+        ${["DEC"].concat(Array.from({length:schedRounds(fi)},(_,k)=>String(k+1))).map(rd=>`<option value="${rd}" ${r.r===rd?"selected":""}>${rd==="DEC"?"Decision":"Round "+rd}</option>`).join("")}
+      </select></td>
+      <td class="mult">${r.w?fmt2(winPointsFor(fi)):"—"}</td>
+      <td class="mult">${r.w?fmt2(bonusFor(fi)):"—"}</td>
+    </tr>`;
+  }).join("");
+}
+
+function renderOdds(){
+  const t=$("#oddsTable");
+  t.innerHTML=`<tr><th>#</th><th>Fighter A</th><th>ML</th><th>Mult</th><th>Fighter B</th><th>ML</th><th>Mult</th><th>Rds</th><th></th></tr>`+
+   S.fights.map((f,fi)=>{
+    const ma=multiplier(f.mlA), mb=multiplier(f.mlB);
+    return `<tr>
+      <td class="fav">${fi+1}</td>
+      <td><input value="${esc(f.a)}" data-f="a" data-fi="${fi}" style="width:130px"></td>
+      <td><input class="ml" value="${f.mlA}" data-f="mlA" data-fi="${fi}"></td>
+      <td class="mult ${isDog(f.mlA)?'dog':'fav'}">${ma?fmt2(ma):"—"}</td>
+      <td><input value="${esc(f.b)}" data-f="b" data-fi="${fi}" style="width:130px"></td>
+      <td><input class="ml" value="${f.mlB}" data-f="mlB" data-fi="${fi}"></td>
+      <td class="mult ${isDog(f.mlB)?'dog':'fav'}">${mb?fmt2(mb):"—"}</td>
+      <td><select data-f="rounds" data-fi="${fi}">
+        <option value="3" ${Number(f.rounds)!==5?"selected":""}>3</option>
+        <option value="5" ${Number(f.rounds)===5?"selected":""}>5</option>
+      </select></td>
+      <td><span class="del" data-delfight="${fi}">×</span></td>
+    </tr>`;
+  }).join("");
+}
+
+function renderResultGrid(){
+  const t=$("#resultGrid");
+  let head=`<tr><th class="fightcol">Fight</th>`+
+    S.players.map(p=>`<th class="pl">${esc(p)}</th>`).join("")+`<th>Winner</th></tr>`;
+  let rows=S.fights.map((f,fi)=>{
+    const r=S.results[fi]||{};
+    const cells=S.players.map((_,pi)=>{
+      const pick=S.picks[pi]&&S.picks[pi][fi];
+      if(!pick) return `<td class="hitloss">—</td>`;
+      const name=pick==="a"?f.a:f.b;
+      const correct=r.w&&pick===r.w;
+      const pts=cellPoints(pi,fi);
+      return `<td class="${correct?'hitwin':'hitloss'}">${esc(name)}${correct?` <span class="miniodds">+${fmt2(pts)}</span>`:""}</td>`;
+    }).join("");
+    const wname=r.w?(r.w==="a"?f.a:f.b):"TBD";
+    const rd=r.w&&r.r&&r.r!=="DEC"?` R${r.r}`:(r.w?" DEC":"");
+    return `<tr><td class="fightcol">${esc(f.a)} <span class="vs">vs</span> ${esc(f.b)}</td>${cells}<td class="mult">${esc(wname)}${rd}</td></tr>`;
+  }).join("");
+  const totalRow=`<tr><td class="fightcol">TOTAL</td>`+
+    S.players.map((_,pi)=>`<td class="pts" style="font-family:var(--mono);font-weight:700">${fmt2(playerTotal(pi))}</td>`).join("")+`<td></td></tr>`;
+  t.innerHTML=head+rows+totalRow;
+}
+
+function renderRules(){
+  $("#winMode").value=String(S.winMode);
+  $("#bonusMode").value=S.bonusMode;
+  const max=Number(S.maxBonus!=null?S.maxBonus:3);
+  const mb=$("#maxBonus"); if(mb) mb.value=max;
+  const taper=(N)=>Array.from({length:N},(_,k)=>fmt2(max*(N-(k+1)+1)/N)).join(" / ");
+  const tn=$("#taperNote");
+  if(tn) tn.innerHTML=`Finish bonus tapers to 0 across the scheduled rounds${S.bonusMode==="weighted"?", then × the multiplier":""}:<br>• 3-round: <b>${taper(3)}</b> (R1/R2/R3) · decision 0<br>• 5-round title: <b>${taper(5)}</b> (R1–R5) · decision 0`;
+  const note=$("#fairnessNote");
+  if(S.bonusMode==="weighted"){
+    note.innerHTML=`<b>Fair mode (default).</b> The flat bonus was unbalanced — a 1st-round KO added the same points whether the winner was a heavy favorite or a longshot, which double-rewarded chalk. Here the bonus is <b>round points × multiplier</b>, so it scales with the same odds your win points use. Example: a Round-1 finish (3 bonus pts) by a 3.5-multiplier underdog adds 10.5; by a 0.6-multiplier favorite adds only 1.8.`;
+  }else if(S.bonusMode==="flat"){
+    note.innerHTML=`<b>Flat mode (your old way).</b> Everyone who picked the winner gets the same fixed bonus for the finishing round regardless of odds. Kept here in case you want it, but this is the part you flagged as unbalanced.`;
+  }else{
+    note.innerHTML=`<b>Round bonus off.</b> Scoring is purely the odds-weighted win points.`;
+  }
+}
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+/* ---------- events ---------- */
+document.addEventListener("input",e=>{
+  const t=e.target;
+  if(t.id==="eventName"){S.event=t.value;writeHash();return;}
+  if(t.dataset.pl!==undefined){S.players[+t.dataset.pl]=t.value;writeHash();renderBoard();renderResultGrid();return;}
+  if(t.dataset.pick!==undefined){const pi=+t.dataset.pi,fi=+t.dataset.fi;S.picks[pi]=S.picks[pi]||{};S.picks[pi][fi]=t.value;live();return;}
+  if(t.dataset.res){const fi=+t.dataset.fi;S.results[fi]=S.results[fi]||{w:"",r:"DEC"};S.results[fi][t.dataset.res]=t.value;live();return;}
+  if(t.dataset.f){const fi=+t.dataset.fi;S.fights[fi][t.dataset.f]=(t.dataset.f.startsWith("ml")?t.value:t.value);live();return;}
+  if(t.id==="maxBonus"){S.maxBonus=parseFloat(t.value)||0;live();return;}
+});
+document.addEventListener("change",e=>{
+  const t=e.target;
+  if(t.id==="winMode"){S.winMode=+t.value;live();}
+  if(t.id==="bonusMode"){S.bonusMode=t.value;render();}
+});
+document.addEventListener("click",e=>{
+  const t=e.target;
+  if(t.dataset.delpl!==undefined){const pi=+t.dataset.delpl;S.players.splice(pi,1);reindexPicks(pi);render();}
+  if(t.dataset.delfight!==undefined){const fi=+t.dataset.delfight;S.fights.splice(fi,1);reindexFights(fi);render();}
+  if(t.classList.contains("tab")){setTab(t.dataset.tab);}
+});
+$("#addPlayer").onclick=()=>{S.players.push("Player "+(S.players.length+1));render();setTab("picks");};
+$("#addFight").onclick=()=>{S.fights.push({a:"Fighter A",b:"Fighter B",mlA:-110,mlB:-110,rounds:3});S.fights.forEach((_,fi)=>{if(!S.results[fi])S.results[fi]={w:"",r:"DEC"};});render();setTab("setup");};
+$("#loadExample").onclick=loadExample;
+$("#loadCurrentBtn").onclick=loadCurrent;
+$("#clearPicks").onclick=()=>{S.picks={};render();};
+$("#resetAll").onclick=()=>{if(confirm("Reset everything?")){S=blankState();render();}};
+$("#winMode").onchange=()=>{};
+function reindexPicks(removed){const np={};let k=0;for(let i=0;i<S.players.length+1;i++){if(i===removed)continue;if(S.picks[i])np[k]=S.picks[i];k++;}S.picks=np;}
+function reindexFights(removed){[S.results].forEach(map=>{const nm={};let k=0;for(let i=0;i<S.fights.length+1;i++){if(i===removed)continue;if(map[i])nm[k]=map[i];k++;}Object.keys(map).forEach(x=>delete map[x]);Object.assign(map,nm);});
+  Object.keys(S.picks).forEach(pi=>{const row=S.picks[pi],nr={};let k=0;for(let i=0;i<S.fights.length+1;i++){if(i===removed)continue;if(row[i]!==undefined)nr[k]=row[i];k++;}S.picks[pi]=nr;});}
+
+function live(){ renderBoard(); renderResultGrid(); renderResults(); renderOdds(); writeHash(); }
+
+function setTab(name){
+  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.tab===name));
+  document.querySelectorAll(".panel-tab").forEach(x=>x.style.display="none");
+  const el=$("#tab-"+name); if(el)el.style.display="block";
+}
+
+/* ---------- share via URL hash (no storage) ---------- */
+function encodeState(){return btoa(unescape(encodeURIComponent(JSON.stringify(S))));}
+function decodeState(str){try{return JSON.parse(decodeURIComponent(escape(atob(str))));}catch(e){return null;}}
+function writeHash(){ // keep edit state in hash so refresh/reopen keeps data
+  const mode=document.body.classList.contains("viewmode")?"v":"e";
+  history.replaceState(null,"","#"+mode+"|"+encodeState());
+}
+function baseUrl(){return location.href.split("#")[0];}
+function copy(txt,msg){navigator.clipboard.writeText(txt).then(()=>toast(msg)).catch(()=>{prompt("Copy this link:",txt);});}
+$("#btnShareView").onclick=()=>copy(baseUrl()+"#v|"+encodeState(),"Results link copied — opens read-only");
+$("#btnShareEdit").onclick=()=>copy(baseUrl()+"#e|"+encodeState(),"Edit link copied");
+$("#btnPng").onclick=()=>{
+  if(typeof html2canvas==="undefined"){toast("PNG needs internet — use the share link instead");return;}
+  const node=$("#tab-board");
+  html2canvas(node,{backgroundColor:getComputedStyle(document.body).backgroundColor,scale:2}).then(cv=>{
+    const a=document.createElement("a");a.download=(S.event||"standings").replace(/[^\w]+/g,"_")+".png";a.href=cv.toDataURL();a.click();toast("PNG downloaded");
+  });
+};
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800);}
+
+/* ---------- data export/import ---------- */
+$("#exportJson").onclick=()=>{const a=document.createElement("a");a.download=(S.event||"pool")+".json";a.href="data:application/json,"+encodeURIComponent(JSON.stringify(S,null,2));a.click();};
+$("#importJson").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const d=decodeState(btoa(unescape(encodeURIComponent(r.result))))||safeJson(r.result);if(d){S=Object.assign(blankState(),d);render();toast("Imported");}};r.readAsText(f);};
+function safeJson(s){try{return JSON.parse(s);}catch(e){return null;}}
+
+/* ---------- boot ---------- */
+function boot(){
+  const h=location.hash.slice(1);
+  if(h){
+    const bar=h.indexOf("|");
+    const mode=bar>0?h.slice(0,bar):"e";
+    const data=bar>0?h.slice(bar+1):h;
+    const d=decodeState(data);
+    if(d){S=Object.assign(blankState(),d);}
+    if(mode==="v"){document.body.classList.add("viewmode");}
+  }
+  if(!S.fights.length){ loadCurrent(); } // start on the current card (UFC 330)
+  else { render(); }
+}
+boot();
+</script>
+</body>
+</html>
