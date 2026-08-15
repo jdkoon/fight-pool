@@ -14,91 +14,89 @@
     "Diaz",
     "Ben",
     "Matt",
-    "Gerry",
-    "Player 11",
-    "Player 12"
+    "Gerry"
   ],
   "fights": [
     {
-      "a": "Makhachev",
-      "b": "Garry",
+      "a": "Islam Makhachev",
+      "b": "Ian Machado Garry",
       "mlA": -350,
       "mlB": 275,
       "rounds": 5
     },
     {
-      "a": "Dern",
-      "b": "Robertson",
+      "a": "Mackenzie Dern",
+      "b": "Gillian Robertson",
       "mlA": -220,
       "mlB": 180,
       "rounds": 5
     },
     {
-      "a": "Turner",
-      "b": "Fernandes",
+      "a": "Jalin Turner",
+      "b": "Kauê Fernandes",
       "mlA": -160,
       "mlB": 135,
       "rounds": 3
     },
     {
-      "a": "Malik",
-      "b": "Stoltzfus",
+      "a": "Mansur Abdul-Malik",
+      "b": "Dustin Stoltzfus",
       "mlA": -650,
       "mlB": 475,
       "rounds": 3
     },
     {
-      "a": "Barboza",
-      "b": "Ribovics",
+      "a": "Edson Barboza",
+      "b": "Esteban Ribovics",
       "mlA": 425,
       "mlB": -575,
       "rounds": 3
     },
     {
-      "a": "Njokuani",
-      "b": "Alverez",
+      "a": "Chidi Njokuani",
+      "b": "Joel Álvarez",
       "mlA": 235,
       "mlB": -300,
       "rounds": 3
     },
     {
-      "a": "Johnson",
-      "b": "Chapolin",
+      "a": "Charles Johnson",
+      "b": "Eduardo Chapolin",
       "mlA": 0,
       "mlB": 0,
       "rounds": 3
     },
     {
-      "a": "Johnson",
-      "b": "Mcconico",
+      "a": "Donte Johnson",
+      "b": "Eric McConico",
       "mlA": -340,
       "mlB": 195,
       "rounds": 3
     },
     {
-      "a": "Luque",
-      "b": "Gore",
+      "a": "Vicente Luque",
+      "b": "Tresean Gore",
       "mlA": 100,
       "mlB": -120,
       "rounds": 3
     },
     {
-      "a": "Tobias",
-      "b": "Fernando",
+      "a": "Rafael Tobias",
+      "b": "Lucas Fernando",
       "mlA": 240,
       "mlB": -300,
       "rounds": 3
     },
     {
-      "a": "Magny",
-      "b": "Brahimaj",
+      "a": "Neil Magny",
+      "b": "Ramiz Brahimaj",
       "mlA": 110,
       "mlB": -130,
       "rounds": 3
     },
     {
-      "a": "Wells",
-      "b": "Orolabai",
+      "a": "Jeremiah Wells",
+      "b": "Myktybek Orolbai",
       "mlA": 600,
       "mlB": -900,
       "rounds": 3
@@ -114,9 +112,7 @@
     "6": {},
     "7": {},
     "8": {},
-    "9": {},
-    "10": {},
-    "11": {}
+    "9": {}
   },
   "maxBonus": 3,
   "lockISO": "2026-08-15T17:00:00-04:00",
