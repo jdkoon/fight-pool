@@ -76,16 +76,16 @@
 
   /* leaderboard */
   .board{display:flex;flex-direction:column;gap:9px}
-  .row{display:grid;grid-template-columns:44px 1fr auto;grid-template-rows:auto auto;gap:2px 10px;
-    align-items:center;background:linear-gradient(180deg,var(--panel),#101018);
+  .row{display:flex;flex-direction:column;gap:7px;background:linear-gradient(180deg,var(--panel),#101018);
     border:1px solid var(--line);border-radius:14px;padding:11px 13px}
-  .row .rank{grid-row:1/3;font-family:var(--disp);font-size:26px;text-align:center;color:var(--muted)}
-  .row .who{font-weight:800;font-size:17px;display:flex;align-items:center;gap:7px;min-width:0}
+  .row .line1{display:flex;align-items:center;gap:10px}
+  .row .rank{font-family:var(--disp);font-size:26px;width:34px;text-align:center;color:var(--muted);flex:none}
+  .row .who{flex:1;min-width:0;font-weight:800;font-size:17px;display:flex;align-items:center;gap:7px}
   .row .who .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .row .pts{grid-row:1/3;font-family:var(--mono);font-weight:800;font-size:18px;text-align:right;color:#fff}
-  .row .barwrap{grid-column:2/3;height:9px;background:#0c0c14;border-radius:6px;overflow:hidden}
+  .row .pts{font-family:var(--mono);font-weight:800;font-size:19px;color:#fff;flex:none}
+  .row .barwrap{height:9px;background:#0c0c14;border-radius:6px;overflow:hidden}
   .row .bar{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--blue),#7bc0ff);transition:width .7s cubic-bezier(.2,.8,.2,1)}
-  .row .quip{grid-column:2/3;font-size:11px;color:var(--muted)}
+  .row .quip{font-size:11px;color:var(--muted)}
   .row.p1{border-color:#7a5a12;background:linear-gradient(180deg,#241d0a,#14100a);box-shadow:0 8px 26px rgba(255,206,70,.14)}
   .row.p1 .rank,.row.p1 .who{color:var(--gold)}
   .row.p1 .bar{background:linear-gradient(90deg,#ffce46,#ffe9a8)}
@@ -240,9 +240,11 @@ function render(){
     const crown=o.rank===1&&o.pts>0?'<span class="crown">👑</span>':"";
     const q=quipFor(o.rank,arr.length,o.pts);
     return `<div class="row ${cls}">
-      <div class="rank">${medal(o.rank)}</div>
-      <div class="who">${crown}<span class="name">${esc(o.n)}</span></div>
-      <div class="pts">${fmt2(o.pts)}</div>
+      <div class="line1">
+        <div class="rank">${medal(o.rank)}</div>
+        <div class="who">${crown}<span class="name">${esc(o.n)}</span></div>
+        <div class="pts">${fmt2(o.pts)}</div>
+      </div>
       <div class="barwrap"><div class="bar" style="width:${w}%"></div></div>
       ${q?`<div class="quip">${q}</div>`:""}
     </div>`;
