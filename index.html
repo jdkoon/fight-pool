@@ -235,13 +235,14 @@ function render(){
     <div class="box"><div class="lab">Top score</div><div class="val">${arr[0]?fmt2(arr[0].pts):"0"}</div></div>`;
 
   document.getElementById("boardBody").innerHTML=arr.map(o=>{
-    const cls=o.rank===1?"p1":o.rank===2?"p2":o.rank===3?"p3":"";
+    const cls=anyPts?(o.rank===1?"p1":o.rank===2?"p2":o.rank===3?"p3":""):"";
     const w=Math.max(3,(o.pts/max)*100);
-    const crown=o.rank===1&&o.pts>0?'<span class="crown">👑</span>':"";
-    const q=quipFor(o.rank,arr.length,o.pts);
+    const crown=anyPts&&o.rank===1&&o.pts>0?'<span class="crown">👑</span>':"";
+    const q=anyPts?quipFor(o.rank,arr.length,o.pts):"";
+    const rankDisp=anyPts?medal(o.rank):o.rank;
     return `<div class="row ${cls}">
       <div class="line1">
-        <div class="rank">${medal(o.rank)}</div>
+        <div class="rank">${rankDisp}</div>
         <div class="who">${crown}<span class="name">${esc(o.n)}</span></div>
         <div class="pts">${fmt2(o.pts)}</div>
       </div>
