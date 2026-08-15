@@ -1,67 +1,91 @@
 {
-  "generatedAt": null,
-  "source": "pre-event",
+  "generatedAt": "2026-08-15T04:23:34.142Z",
+  "source": "espn",
   "event": "UFC 330 — Makhachev vs. Machado Garry",
   "fights": {
     "0": {
       "w": "",
       "r": "DEC",
-      "method": ""
+      "method": "",
+      "conf": 95,
+      "rounds": 5
     },
     "1": {
       "w": "",
       "r": "DEC",
-      "method": ""
+      "method": "",
+      "conf": 95,
+      "rounds": 5
     },
     "2": {
       "w": "",
       "r": "DEC",
-      "method": ""
+      "method": "",
+      "conf": 95,
+      "rounds": 3
     },
     "3": {
       "w": "",
       "r": "DEC",
-      "method": ""
+      "method": "",
+      "conf": 95,
+      "rounds": 3
     },
     "4": {
       "w": "",
       "r": "DEC",
-      "method": ""
+      "method": "",
+      "conf": 95,
+      "rounds": 3
     },
     "5": {
       "w": "",
       "r": "DEC",
-      "method": ""
+      "method": "",
+      "conf": 95,
+      "rounds": 3
     },
     "6": {
       "w": "",
       "r": "DEC",
-      "method": ""
+      "method": "",
+      "conf": 95,
+      "rounds": 3
     },
     "7": {
       "w": "",
       "r": "DEC",
-      "method": ""
+      "method": "",
+      "conf": 95,
+      "rounds": 3
     },
     "8": {
       "w": "",
       "r": "DEC",
-      "method": ""
+      "method": "",
+      "conf": 95,
+      "rounds": 3
     },
     "9": {
       "w": "",
       "r": "DEC",
-      "method": ""
+      "method": "",
+      "conf": 95,
+      "rounds": 3
     },
     "10": {
       "w": "",
       "r": "DEC",
-      "method": ""
+      "method": "",
+      "conf": 95,
+      "rounds": 3
     },
     "11": {
       "w": "",
       "r": "DEC",
-      "method": ""
+      "method": "",
+      "conf": 95,
+      "rounds": 3
     }
   }
 }
