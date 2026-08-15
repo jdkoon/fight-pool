@@ -130,7 +130,8 @@
   table.grid td.cell{color:var(--ink)}
   table.grid td.hit{color:#8ff0b6;font-weight:800;background:#0f2c1c}
   table.grid td.hit .cpts{display:block;font-family:var(--mono);font-size:9px;color:#57e08a;font-weight:700}
-  table.grid td.miss{color:var(--muted);opacity:.5}
+  table.grid td.miss{color:#ff8080;font-weight:700;background:#2c1010;text-decoration:line-through;text-decoration-color:rgba(255,128,128,.55)}
+  table.grid td .mk{font-weight:800;margin-right:2px}
   table.grid td.empty{color:var(--muted);opacity:.4}
   table.grid tbody tr:last-child td{border-bottom:none}
   .gridnote{color:var(--muted);font-size:11px;text-align:center;margin:8px 2px 0}
@@ -331,15 +332,15 @@ function render(){
         const nm=esc(lastName(pick==="a"?f.a:f.b));
         const r=RESULTS.fights[fi];
         if(r&&r.w){
-          if(r.w===pick) return `<td class="hit">${nm}<span class="cpts">+${fmt2(cellPoints(pi,fi))}</span></td>`;
-          return `<td class="miss">${nm}</td>`;
+          if(r.w===pick) return `<td class="hit"><span class="mk">✓</span>${nm}<span class="cpts">+${fmt2(cellPoints(pi,fi))}</span></td>`;
+          return `<td class="miss"><span class="mk">✗</span>${nm}</td>`;
         }
         return `<td class="cell">${nm}</td>`;
       }).join("");
       return `<tr><td class="pname">${esc(o.n)}</td>${cells}</tr>`;
     }).join("");
     gridEl.innerHTML=`<div class="gridwrap"><table class="grid"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`+
-      `<div class="gridnote">← scroll for all ${CONFIG.fights.length} fights · <span style="color:#8ff0b6">green</span> = called it right</div>`;
+      `<div class="gridnote">← scroll for all ${CONFIG.fights.length} fights · <span style="color:#8ff0b6">✓ green = nailed it</span> · <span style="color:#ff8080">✗ red = missed</span> · updates live</div>`;
   }
 
   const when=RESULTS.generatedAt?new Date(RESULTS.generatedAt):null;
