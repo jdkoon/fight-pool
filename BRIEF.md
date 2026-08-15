@@ -33,10 +33,11 @@ odds-weighted standings that update from ESPN during the event.
 ## Scoring (verified against John's original spreadsheet)
 - multiplier = 1 / (2 × impliedProbability) from American moneyline. ml 0 ⇒ multiplier 1.0.
 - **Win** = 3 × multiplier.
-- **Round-finish bonus** = maxBonus(3) × (N − r + 1)/N × multiplier, where N = scheduled
-  rounds (5 for title/main-event fights, else 3), r = finishing round. Decision / going the
-  distance = 0 bonus. (3-round: 3/2/1; 5-round: 3/2.4/1.8/1.2/0.6.)
-- Underdogs pay more; early finishes pay more; both weighted by the same multiplier.
+- **Round-finish bonus** = maxBonus(3) × (N − r + 1)/N, where N = scheduled rounds (5 for
+  title/main-event fights, else 3), r = finishing round. Decision / going the distance = 0 bonus.
+  (3-round: 3/2/1; 5-round: 3/2.4/1.8/1.2/0.6.) **NOT multiplied by odds** — clean 0–3.
+  `config.bonusMode` = "flat" (was "weighted" — changed 8/15 per John: only the win is odds-weighted).
+- Underdogs pay more on the WIN; early finishes pay a flat bonus regardless of odds.
 
 ## The 5 PM lock
 - An Apps Script **time-based trigger** (in the Apps Script project above) runs function

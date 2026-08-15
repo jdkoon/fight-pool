@@ -3,7 +3,7 @@
   "espnLeague": "ufc",
   "espnDate": "20260815",
   "winMode": 3,
-  "bonusMode": "weighted",
+  "bonusMode": "flat",
   "players": [
     "Tyler",
     "Ian",

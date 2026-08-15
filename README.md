@@ -90,12 +90,13 @@ Handy flags:
 
 ## Good to know
 
-- **Scoring:** a win is worth **3 × the fighter's multiplier**. A finish adds a **round
-  bonus (also × multiplier)** that starts at 3 for a round-1 finish and tapers linearly to
-  0 at the final bell — so it's round-count aware: a 3-round fight pays **3 / 2 / 1**
-  (R1/R2/R3); a 5-round title fight pays **3 / 2.4 / 1.8 / 1.2 / 0.6** (R1–R5). Decisions
-  score 0. The scraper reads scheduled rounds straight from ESPN (`format.regulation.periods`
-  — 5 for a title/main event, else 3), so title fights are detected automatically. Tune
+- **Scoring:** a win is worth **3 × the fighter's multiplier** (odds-weighted). A finish adds a
+  **flat round bonus** (NOT multiplied by odds) that starts at 3 for a round-1 finish and tapers
+  linearly to 0 at the final bell — round-count aware: a 3-round fight pays **3 / 2 / 1**
+  (R1/R2/R3); a 5-round title fight pays **3 / 2.4 / 1.8 / 1.2 / 0.6** (R1–R5). Decisions score 0.
+  The scraper reads scheduled rounds straight from ESPN (`format.regulation.periods` — 5 for a
+  title/main event, else 3), so title fights are detected automatically. `config.bonusMode`:
+  "flat" = clean bonus (current), "weighted" = bonus × multiplier, "off" = no bonus. Tune
   `winMode` and `maxBonus` in `config.json`.
 - **Name matching is fuzzy** (it caught "Idris" vs ESPN's "Idiris" automatically) but the
   `--dry` check + `espnA`/`espnB` overrides are your safety net for oddball spellings.
