@@ -108,6 +108,7 @@
   .side+.side{border-left:1px solid var(--line)}
   .side .fname{font-weight:800;font-size:15px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
   .side .mult{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .side .nick{font-size:11px;color:var(--gold);font-style:italic;font-weight:600;margin-top:1px}
   .side.win .fname{color:var(--green)}
   .side.lose{opacity:.55}
   .side .chips{margin-top:7px;display:flex;flex-wrap:wrap;gap:5px}
@@ -442,8 +443,10 @@ function render(){
     const sideHTML=(f,ml,mult,side,pickers)=>{
       const win=r.w&&r.w===side, lose=r.w&&r.w!==side;
       const belt=win?' <span class="beltwin">🏆</span>':"";
+      const nick=side==='a'?f.nickA:f.nickB;
       return `<div class="side ${win?'win':''} ${lose?'lose':''}">
         <div class="fname">${esc(side==='a'?f.a:f.b)}${belt}</div>
+        ${nick?`<div class="nick">"${esc(nick)}"</div>`:''}
         <div class="mult">${mult?('×'+fmt2(mult)):''}${(side==='a'?f.mlA:f.mlB)!=null?` · ${(side==='a'?f.mlA:f.mlB)>0?'+':''}${(side==='a'?f.mlA:f.mlB)}`:''}</div>
         ${pickers.length?`<div class="chips">${pickers.map(pi=>chip(pi,side)).join("")}</div>`:`<div class="none">nobody 😬</div>`}
       </div>`;

@@ -22,21 +22,24 @@
       "b": "Ian Machado Garry",
       "mlA": -350,
       "mlB": 275,
-      "rounds": 5
+      "rounds": 5,
+      "nickB": "The Future"
     },
     {
       "a": "Mackenzie Dern",
       "b": "Gillian Robertson",
       "mlA": -220,
       "mlB": 180,
-      "rounds": 5
+      "rounds": 5,
+      "nickB": "The Savage"
     },
     {
       "a": "Jalin Turner",
       "b": "Kauê Fernandes",
       "mlA": -160,
       "mlB": 135,
-      "rounds": 3
+      "rounds": 3,
+      "nickA": "The Tarantula"
     },
     {
       "a": "Mansur Abdul-Malik",
@@ -57,14 +60,17 @@
       "b": "Joel Álvarez",
       "mlA": 235,
       "mlB": -300,
-      "rounds": 3
+      "rounds": 3,
+      "nickA": "Bang Bang",
+      "nickB": "El Fenómeno"
     },
     {
       "a": "Charles Johnson",
       "b": "Eduardo Chapolin",
       "mlA": -120,
       "mlB": 100,
-      "rounds": 3
+      "rounds": 3,
+      "nickA": "InnerG"
     },
     {
       "a": "Donte Johnson",
@@ -78,7 +84,8 @@
       "b": "Tresean Gore",
       "mlA": 100,
       "mlB": -120,
-      "rounds": 3
+      "rounds": 3,
+      "nickA": "The Silent Assassin"
     },
     {
       "a": "Rafael Tobias",
@@ -92,7 +99,8 @@
       "b": "Ramiz Brahimaj",
       "mlA": 110,
       "mlB": -130,
-      "rounds": 3
+      "rounds": 3,
+      "nickA": "The Haitian Sensation"
     },
     {
       "a": "Jeremiah Wells",
