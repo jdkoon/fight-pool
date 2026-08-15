@@ -228,10 +228,17 @@ function render(){
   const max=Math.max(1,...arr.map(a=>a.pts));
   const scored=CONFIG.fights.filter((_,fi)=>RESULTS.fights[fi]&&RESULTS.fights[fi].w).length;
   const anyPts=arr.some(a=>a.pts>0);
+  let leaderLab="Leader", leaderVal="The J's";
+  if(anyPts){
+    const top=arr[0].pts;
+    const tied=arr.filter(a=>Math.abs(a.pts-top)<1e-9);
+    if(tied.length>1){ leaderLab="Leaders"; leaderVal="Logjam ("+tied.length+")"; }
+    else { leaderLab="Current champ"; leaderVal=esc(arr[0].n); }
+  }
   document.getElementById("kpi").innerHTML=`
     <div class="box"><div class="lab">Degenerates</div><div class="val">${CONFIG.players.length}</div></div>
     <div class="box"><div class="lab">Fights in the books</div><div class="val">${scored}/${CONFIG.fights.length}</div></div>
-    <div class="box"><div class="lab">${anyPts?"Current champ":"Leader"}</div><div class="val">${arr[0]?esc(arr[0].n):"—"}</div></div>
+    <div class="box"><div class="lab">${leaderLab}</div><div class="val">${leaderVal}</div></div>
     <div class="box"><div class="lab">Top score</div><div class="val">${arr[0]?fmt2(arr[0].pts):"0"}</div></div>`;
 
   document.getElementById("boardBody").innerHTML=arr.map(o=>{
