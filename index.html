@@ -85,7 +85,8 @@
   .row .pts{font-family:var(--mono);font-weight:800;font-size:19px;color:#fff;flex:none}
   .row .barwrap{height:9px;background:#0c0c14;border-radius:6px;overflow:hidden}
   .row .bar{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--blue),#7bc0ff);transition:width .7s cubic-bezier(.2,.8,.2,1)}
-  .row .quip{font-size:11px;color:var(--muted)}
+  .row .quip{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.2px}
+  .row.p1 .quip{color:var(--gold)}
   .row.p1{border-color:#7a5a12;background:linear-gradient(180deg,#241d0a,#14100a);box-shadow:0 8px 26px rgba(255,206,70,.14)}
   .row.p1 .rank,.row.p1 .who{color:var(--gold)}
   .row.p1 .bar{background:linear-gradient(90deg,#ffce46,#ffe9a8)}
@@ -194,19 +195,32 @@ function medal(r){return r===1?"🥇":r===2?"🥈":r===3?"🥉":r;}
 /* ===== flavor ===== */
 const TAGLINES=[
   "Where confidence goes to get knocked out.",
-  "12 experts. 1 winner. 11 excuses.",
+  "10 experts. 1 winner. 9 excuses.",
   "Picking favorites is for cowards. 💰",
   "Somebody's about to talk a lot of trash.",
   "Chalk is for losers and sidewalks.",
-  "The odds don't care about your feelings."
+  "The odds don't care about your feelings.",
+  "Styles make fights. Bad picks make group chats.",
+  "No refunds on bad beats.",
+  "Fortune favors the degenerate.",
+  "Everyone's a genius until the cage door shuts."
 ];
-function quipFor(rank,total,pts){
-  if(total<=1) return "";
-  if(rank===1) return "👑 running the division";
-  if(rank===total) return "🚑 needs a doctor stoppage";
-  if(rank===total-1) return "🪣 hanging on the ropes";
-  if(rank===2) return "🔪 one good night away";
-  return "";
+// 10-tier ladder, rank 1 (belt) down to rank 10 (curtain jerker)
+const RANK_TITLES=[
+  "👑 Undisputed Champ",
+  "🥇 #1 Contender",
+  "🎯 One Win From The Belt",
+  "🔪 Ranked Killer",
+  "🚪 Gatekeeper",
+  "🥊 Mid-Card Regular",
+  "🧳 Journeyman",
+  "🥫 Tomato Can",
+  "🩹 Enhancement Talent",
+  "🤡 Curtain Jerker"
+];
+function rankTitle(rank,pts){
+  if(pts<=0) return "🍿 hasn't landed one";     // scored started, still winless
+  return RANK_TITLES[Math.min(Math.max(rank,1),10)-1] || "";
 }
 
 function standings(){
@@ -268,7 +282,7 @@ function render(){
     const cls=anyPts?(o.rank===1?"p1":o.rank===2?"p2":o.rank===3?"p3":""):"";
     const w=Math.max(3,(o.pts/max)*100);
     const crown=anyPts&&o.rank===1&&o.pts>0?'<span class="crown">👑</span>':"";
-    const q=anyPts?quipFor(o.rank,arr.length,o.pts):"";
+    const q=anyPts?rankTitle(o.rank,o.pts):"";
     const rankDisp=anyPts?medal(o.rank):o.rank;
     return `<div class="row ${cls}">
       <div class="line1">
