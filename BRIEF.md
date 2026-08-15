@@ -56,20 +56,32 @@ Tyler, Ian, Bobby, Logan, Nick, John, Diaz, Ben, Matt, Gerry.
 4. Mansur Abdul-Malik (-650) vs Dustin Stoltzfus (+475) — 3R
 5. Edson Barboza (+425) vs Esteban Ribovics (-575) — 3R
 6. Chidi Njokuani (+235) vs Joel Alvarez (-300) — 3R
-7. Charles Johnson (0) vs Eduardo Chapolin (0) — 3R  [pick'em — swap in real odds when posted]
+7. Charles Johnson (-120) vs Eduardo Chapolin (+100) — 3R  [real odds locked in 8/15]
 8. Donte Johnson (-340) vs Eric McConico (+195) — 3R
 9. Vicente Luque (+100) vs Tresean Gore (-120) — 3R
 10. Rafael Tobias (+240) vs Lucas Fernando (-300) — 3R
 11. Neil Magny (+110) vs Ramiz Brahimaj (-130) — 3R
 12. Jeremiah Wells (+600) vs Myktybek Orolbai (-900) — 3R
 
-## Status / TODO
-- [x] Scoreboard hosted, mobile, styled; leader tile: "TBD, chumps" pre-scoring, "Logjam (n)" on a tie, else champ name.
-- [x] Google Form built + published (anyone with link) + responses sheet linked.
-- [x] Hard 5 PM lock armed (Apps Script trigger).
-- [ ] **At/after 5 PM:** convert form responses → config.json picks (latest pre-deadline per person) → push. Then the "who picked whom" grid + standings populate.
-- [ ] **GitHub Action** for live results — confirm it's committed and green (`.github/workflows/update.yml`); trigger a manual run (workflow_dispatch) to test.
-- [ ] Charles Johnson/Chapolin real odds when they post (currently 0/0 = even).
+## Status / TODO (as of 8/15, pre-event — everything DONE)
+- [x] Scoreboard hosted, mobile, styled.
+- [x] Google Form built + published + responses sheet linked. **Form is now CLOSED** (not accepting responses).
+- [x] **Picks are LOCKED & LOADED** — all 10 players' picks in config.json. Hard lock via `config.locked=true` (site shows "PICKS ARE LOCKED" regardless of clock). `lockISO` still 2026-08-15T17:00:00-04:00 for reference. Apps Script 5PM trigger left armed (redundant now; harmless).
+- [x] **GitHub Action live-results updater** confirmed green and running every 5 min. `update.mjs` now writes/commits ONLY when a fight result actually changes (no idle churn / no wasted Pages rebuilds).
+- [x] Charles Johnson/Chapolin real odds locked: -120 / +100.
+
+### ⚠️ MANUAL PICK OVERRIDES (NOT on the Google Form — re-apply if you ever rebuild picks from the sheet!)
+- **Tyler → fight index 7 (Donte Johnson vs McConico) = "a" (Donte Johnson)** — Tyler left this blank on the form; texted it in.
+- **Matt → fight index 3 (Abdul-Malik vs Stoltzfus) = "a" (Mansur Abdul-Malik)** — changed from his form pick (Stoltzfus) by text.
+If you re-run any responses→config converter, these two get wiped back to form values — set them again.
+
+## Humor / features on the scoreboard (index.html, all state-driven & auto-updating every 30s)
+- KPI label "Bozos" (was Degenerates). Leader tile: "TBD, chumps" pre-scoring / "Logjam (n)" on tie / champ name.
+- **10-tier rank titles** ladder per row: 👑 Undisputed Champ → … → 🤡 You're Dogshit (rank 10); 🧊 Stone Cold Zero for winless.
+- **🧊 Cooler of the Night** tile (auto-roasts last place).
+- **📢 Live From the Cage** feed — one line per resolved fight (UPSET + draw call-outs, who nailed/missed).
+- **🎙️ Ringside Mic** announcer above the leaderboard — narrates hype→breakdown→final crowning.
+- **Confetti** on lead change. **THE SLIPS** grid: green ✓ / red ✗ strikethrough per pick, live.
 
 ## How to make changes
 Message Claude what you want. Claude edits the files and pushes to the repo. The push
