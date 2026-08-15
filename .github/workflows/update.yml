@@ -1,7 +1,9 @@
 name: Update fight results
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    # every 6 minutes = max 10 runs/hour, at/under GitHub Pages' 10-builds/hour soft limit.
+    # (Most runs commit nothing thanks to write-only-on-change, so real rebuilds stay well under.)
+    - cron: "*/6 * * * *"
   workflow_dispatch:
 permissions:
   contents: write
