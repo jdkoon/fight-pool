@@ -2,92 +2,159 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fight Pool — Live Standings</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0f">
+<title>🥊 Fight Pool — Live Standings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0f1216; --panel:#171c23; --panel2:#1e242d; --line:#2a323d;
-    --ink:#eef2f7; --muted:#9aa7b6; --accent:#e8b93b; --accent2:#4aa3ff; --win:#37c26b;
-    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; --radius:12px;
+    --bg:#0a0a0f; --panel:#14141c; --panel2:#1b1b26; --line:#2a2a3a;
+    --ink:#f3f4f8; --muted:#9aa0b4;
+    --red:#ff3b3b; --red2:#c81e2b; --gold:#ffce46; --green:#37e08b; --blue:#4aa3ff;
+    --disp:"Bebas Neue",Impact,system-ui,sans-serif;
+    --body:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-  .wrap{max-width:1100px;margin:0 auto;padding:20px 16px 70px}
-  header.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between;margin-bottom:14px}
-  h1{font-size:22px;margin:0}
-  .sub{color:var(--muted);font-size:13px;margin-top:2px}
-  .live{display:inline-flex;align-items:center;gap:6px;background:#12351f;color:#57d98a;border:1px solid #1e5c37;border-radius:999px;padding:4px 11px;font-size:12px;font-weight:700}
-  .dot{width:8px;height:8px;border-radius:50%;background:#57d98a;animation:pulse 1.6s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px}
-  .card h2{font-size:14px;margin:0 0 10px;letter-spacing:.3px;text-transform:uppercase;color:var(--muted)}
-  .kpi{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
-  .kpi .box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:110px;flex:1}
-  .kpi .lab{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-  .kpi .val{font-size:22px;font-weight:700;margin-top:2px}
-  table{border-collapse:collapse;width:100%}
-  .board td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
-  .board .rank{width:54px;text-align:center;font-size:20px}
-  .board .who{font-weight:700;font-size:17px}
-  .board .barcell{width:46%}
-  .board .pts{font-family:var(--mono);font-weight:700;font-size:17px;text-align:right}
-  .bar{height:12px;border-radius:6px;min-width:3px;background:linear-gradient(90deg,#4aa3ff,#7bc0ff);transition:width .6s ease}
-  .board tr.p1 .bar{background:linear-gradient(90deg,#e8b93b,#f7dd86)}
-  .board tr.p2 .bar{background:linear-gradient(90deg,#aab6c4,#d7dee6)}
-  .board tr.p3 .bar{background:linear-gradient(90deg,#cd8b52,#e0a877)}
-  .board tr.p1 .who{color:#f2d06b}
-  .scroll{overflow:auto;border:1px solid var(--line);border-radius:10px}
-  .grid th,.grid td{padding:7px 9px;border-bottom:1px solid var(--line);white-space:nowrap;font-size:13px;text-align:left}
-  .grid th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0;background:var(--panel)}
-  .grid .fightcol{position:sticky;left:0;background:var(--panel);font-weight:600;min-width:150px}
-  .hitwin{color:var(--win);font-weight:700}
-  .miss{color:var(--muted);opacity:.6}
-  .miniodds{font-family:var(--mono);font-size:11px}
-  .res{font-family:var(--mono);font-size:12px;color:var(--accent)}
-  .tbd{color:var(--muted);font-style:italic}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:
+      radial-gradient(1200px 500px at 50% -10%, rgba(255,59,59,.16), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(255,206,70,.10), transparent 55%),
+      var(--bg);
+    color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .wrap{max-width:680px;margin:0 auto;padding:16px 14px 60px}
+  a{color:var(--gold)}
+
+  /* header */
+  .hero{text-align:center;padding:10px 6px 6px;position:relative}
+  .belt{display:inline-block;font-family:var(--disp);letter-spacing:2px;font-size:13px;
+    color:#20180a;background:linear-gradient(90deg,#ffce46,#ffe9a8,#ffce46);
+    padding:3px 14px;border-radius:999px;transform:rotate(-1.5deg);box-shadow:0 4px 14px rgba(255,206,70,.35)}
+  h1{font-family:var(--disp);font-weight:400;letter-spacing:1.5px;line-height:.95;margin:10px 0 4px;
+    font-size:clamp(34px,10vw,58px);
+    background:linear-gradient(180deg,#fff, #ffd9a0 60%, #ff8a3b);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 2px 30px rgba(255,120,60,.25)}
+  .tagline{color:var(--muted);font-size:14px;font-style:italic;margin:2px 0 12px;min-height:20px}
+  .statusbar{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+  .live{display:inline-flex;align-items:center;gap:6px;background:#14351f;color:#57e08a;border:1px solid #1e5c37;
+    border-radius:999px;padding:4px 11px;font-size:12px;font-weight:800;letter-spacing:.5px}
+  .dot{width:8px;height:8px;border-radius:50%;background:#57e08a;box-shadow:0 0 10px #57e08a;animation:pulse 1.4s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
   .updated{color:var(--muted);font-size:12px}
-  .btn{appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600}
-  .btn:hover{border-color:#3a4655}
-  .foot{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
-  .err{background:#3a1c1c;border:1px solid #6b2b2b;color:#f0b4b4;padding:12px 14px;border-radius:10px;margin-bottom:16px;display:none}
+  .btn{appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--ink);
+    padding:8px 13px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;font-family:var(--body)}
+  .btn:active{transform:scale(.97)}
+
+  /* lock banner */
+  .lock{margin:12px 0;padding:12px 14px;border-radius:14px;text-align:center;
+    background:linear-gradient(90deg,rgba(255,59,59,.16),rgba(255,206,70,.14));
+    border:1px solid #3a2a2a}
+  .lock .big{font-family:var(--disp);font-size:26px;letter-spacing:1px;color:#fff}
+  .lock .cd{font-family:var(--mono);font-weight:800;color:var(--gold)}
+  .lock a.cta{display:inline-block;margin-top:8px;background:linear-gradient(90deg,var(--red),var(--red2));
+    color:#fff;text-decoration:none;font-weight:800;padding:9px 18px;border-radius:10px;
+    box-shadow:0 6px 18px rgba(255,59,59,.35)}
+  .lock.locked{background:linear-gradient(90deg,rgba(120,120,140,.12),rgba(120,120,140,.06));border-color:#33333f}
+
+  /* kpi */
+  .kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}
+  .kpi .box{background:linear-gradient(180deg,var(--panel),#101018);border:1px solid var(--line);
+    border-radius:14px;padding:12px 14px;position:relative;overflow:hidden}
+  .kpi .box::after{content:"";position:absolute;inset:0;background:radial-gradient(120px 60px at 100% 0,rgba(255,206,70,.10),transparent)}
+  .kpi .lab{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:800}
+  .kpi .val{font-family:var(--disp);font-size:30px;letter-spacing:1px;margin-top:2px;color:#fff}
+
+  h2.sec{font-family:var(--disp);letter-spacing:1.5px;font-size:24px;margin:22px 0 12px;color:#fff;
+    display:flex;align-items:center;gap:8px}
+  h2.sec .em{font-size:20px}
+
+  /* leaderboard */
+  .board{display:flex;flex-direction:column;gap:9px}
+  .row{display:grid;grid-template-columns:44px 1fr auto;grid-template-rows:auto auto;gap:2px 10px;
+    align-items:center;background:linear-gradient(180deg,var(--panel),#101018);
+    border:1px solid var(--line);border-radius:14px;padding:11px 13px}
+  .row .rank{grid-row:1/3;font-family:var(--disp);font-size:26px;text-align:center;color:var(--muted)}
+  .row .who{font-weight:800;font-size:17px;display:flex;align-items:center;gap:7px;min-width:0}
+  .row .who .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .row .pts{grid-row:1/3;font-family:var(--mono);font-weight:800;font-size:18px;text-align:right;color:#fff}
+  .row .barwrap{grid-column:2/3;height:9px;background:#0c0c14;border-radius:6px;overflow:hidden}
+  .row .bar{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--blue),#7bc0ff);transition:width .7s cubic-bezier(.2,.8,.2,1)}
+  .row .quip{grid-column:2/3;font-size:11px;color:var(--muted)}
+  .row.p1{border-color:#7a5a12;background:linear-gradient(180deg,#241d0a,#14100a);box-shadow:0 8px 26px rgba(255,206,70,.14)}
+  .row.p1 .rank,.row.p1 .who{color:var(--gold)}
+  .row.p1 .bar{background:linear-gradient(90deg,#ffce46,#ffe9a8)}
+  .row.p2 .bar{background:linear-gradient(90deg,#c7d0da,#eef2f7)}
+  .row.p3 .bar{background:linear-gradient(90deg,#cd8b52,#e6b184)}
+  .crown{filter:drop-shadow(0 0 6px rgba(255,206,70,.6))}
+
+  /* fight cards */
+  .fights{display:flex;flex-direction:column;gap:12px}
+  .fc{background:linear-gradient(180deg,var(--panel),#101018);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .fc .top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 13px;border-bottom:1px solid var(--line)}
+  .fc .match{font-family:var(--disp);font-size:19px;letter-spacing:.6px;color:#fff}
+  .fc .rds{font-size:10px;font-weight:800;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:2px 6px;margin-left:6px;vertical-align:middle}
+  .fc .res{font-size:12px;font-weight:800;font-family:var(--mono);white-space:nowrap}
+  .fc .res.tbd{color:var(--muted)}
+  .fc .res.done{color:var(--gold)}
+  .sides{display:grid;grid-template-columns:1fr 1fr}
+  .side{padding:10px 12px}
+  .side+.side{border-left:1px solid var(--line)}
+  .side .fname{font-weight:800;font-size:15px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .side .mult{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .side.win .fname{color:var(--green)}
+  .side.lose{opacity:.55}
+  .side .chips{margin-top:7px;display:flex;flex-wrap:wrap;gap:5px}
+  .chip{font-size:12px;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-weight:600}
+  .chip.hit{background:#0f2c1c;border-color:#1e5c37;color:#8ff0b6}
+  .chip .p{font-family:var(--mono);font-size:10px;color:#57e08a;margin-left:4px}
+  .side .none{font-size:11px;color:var(--muted);opacity:.6;margin-top:7px}
+  .beltwin{font-size:11px}
+
+  .foot{color:var(--muted);font-size:12px;text-align:center;margin-top:26px;line-height:1.6}
+  .err{background:#3a1c1c;border:1px solid #6b2b2b;color:#f0b4b4;padding:12px 14px;border-radius:12px;margin:12px 0;display:none}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="top">
-    <div>
-      <h1 id="eventName">Fight Pool</h1>
-      <div class="sub">Odds-weighted standings · updates automatically</div>
+  <div class="hero">
+    <span class="belt">🏆 UNDISPUTED FIGHT POOL 🏆</span>
+    <h1 id="eventName">Fight Pool</h1>
+    <div class="tagline" id="tagline">&nbsp;</div>
+    <div class="statusbar">
+      <span class="live"><span class="dot"></span> LIVE</span>
+      <span class="updated" id="updated">—</span>
+      <button class="btn" id="refresh">↻ Refresh</button>
     </div>
-    <div style="text-align:right">
-      <div class="live"><span class="dot"></span> LIVE</div>
-      <div class="updated" id="updated">—</div>
-      <button class="btn" id="refresh" style="margin-top:6px">↻ Refresh now</button>
-    </div>
-  </header>
+  </div>
 
+  <div class="lock" id="lock" style="display:none"></div>
   <div class="err" id="err"></div>
 
   <div class="kpi" id="kpi"></div>
 
-  <div class="card">
-    <h2>Standings</h2>
-    <table class="board"><tbody id="boardBody"></tbody></table>
-  </div>
+  <h2 class="sec"><span class="em">👑</span> THE PECKING ORDER</h2>
+  <div class="board" id="boardBody"></div>
 
-  <div class="card">
-    <h2>Who picked whom</h2>
-    <div class="scroll"><table class="grid" id="grid"></table></div>
-  </div>
+  <h2 class="sec"><span class="em">🥊</span> TALE OF THE TAPE</h2>
+  <div class="fights" id="fights"></div>
 
-  <div class="foot" id="foot">Live results pulled from ESPN · scoring is odds-weighted</div>
+  <div class="foot" id="foot">
+    Live results yanked straight off ESPN · scoring is odds-weighted (underdogs pay, early finishes pay more)<br>
+    May the best degenerate win. 🫡
+  </div>
 </div>
 
 <script>
 "use strict";
 let CONFIG=null, RESULTS=null;
 
-/* scoring (identical to the setup tool, verified vs the spreadsheet) */
+/* ===== scoring (verified vs spreadsheet — do not change) ===== */
 function impliedProb(ml){ml=Number(ml);if(isNaN(ml))return null;if(ml===0)return 0.5;return ml>0?100/(ml+100):(-ml)/((-ml)+100);}
 function multiplier(ml){const p=impliedProb(ml);if(p===null||p===0)return 0;return 1/(2*p);}
 function winnerML(fi){const r=RESULTS.fights[fi];if(!r||!r.w)return null;return r.w==="a"?CONFIG.fights[fi].mlA:CONFIG.fights[fi].mlB;}
@@ -99,7 +166,25 @@ function cellPoints(pi,fi){const r=RESULTS.fights[fi];if(!r||!r.w)return 0;const
 function playerTotal(pi){let t=0;CONFIG.fights.forEach((_,fi)=>{t+=cellPoints(pi,fi);});return t;}
 function fmt2(n){return (Math.round(n*100)/100).toFixed(2);}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
-function medal(r){return r===1?"🥇":r===2?"🥈":r===3?"🥉":("#"+r);}
+function medal(r){return r===1?"🥇":r===2?"🥈":r===3?"🥉":r;}
+
+/* ===== flavor ===== */
+const TAGLINES=[
+  "Where confidence goes to get knocked out.",
+  "12 experts. 1 winner. 11 excuses.",
+  "Picking favorites is for cowards. 💰",
+  "Somebody's about to talk a lot of trash.",
+  "Chalk is for losers and sidewalks.",
+  "The odds don't care about your feelings."
+];
+function quipFor(rank,total,pts){
+  if(total<=1) return "";
+  if(rank===1) return "👑 running the division";
+  if(rank===total) return "🚑 needs a doctor stoppage";
+  if(rank===total-1) return "🪣 hanging on the ropes";
+  if(rank===2) return "🔪 one good night away";
+  return "";
+}
 
 function standings(){
   const arr=CONFIG.players.map((n,i)=>({i,n,pts:playerTotal(i)}));
@@ -108,43 +193,98 @@ function standings(){
   arr.forEach(o=>{seen++;if(last===null||o.pts<last-1e-9){rank=seen;last=o.pts;}o.rank=rank;});
   return arr;
 }
+
+/* ===== lock countdown ===== */
+function lockTime(){ return CONFIG.lockISO ? new Date(CONFIG.lockISO) : null; }
+function renderLock(){
+  const el=document.getElementById("lock");
+  const t=lockTime();
+  if(!t){ el.style.display="none"; return; }
+  el.style.display="block";
+  const now=new Date();
+  const formUrl=CONFIG.formUrl||"";
+  if(now>=t){
+    el.className="lock locked";
+    el.innerHTML=`<div class="big">🔒 PICKS ARE LOCKED</div><div style="color:var(--muted);font-size:13px;margin-top:2px">No takebacks. Live and die by 'em.</div>`;
+    return;
+  }
+  let ms=t-now, s=Math.floor(ms/1000);
+  const d=Math.floor(s/86400); s-=d*86400;
+  const h=Math.floor(s/3600); s-=h*3600;
+  const m=Math.floor(s/60); s-=m*60;
+  const cd=(d?d+"d ":"")+String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  el.className="lock";
+  el.innerHTML=`<div class="big">⏳ PICKS LOCK IN</div><div class="cd" style="font-size:22px;margin:4px 0">${cd}</div>`+
+    (formUrl?`<a class="cta" href="${esc(formUrl)}" target="_blank" rel="noopener">🥊 MAKE YOUR PICKS</a>`:
+     `<div style="color:var(--muted);font-size:12px">pick form drops soon</div>`);
+}
+
 function render(){
   document.getElementById("eventName").textContent=CONFIG.event||"Fight Pool";
+  const tagEl=document.getElementById("tagline");
+  if(tagEl.dataset.set!=="1"){ tagEl.textContent=TAGLINES[Math.floor(Math.random()*TAGLINES.length)]; tagEl.dataset.set="1"; }
+
   const arr=standings();
   const max=Math.max(1,...arr.map(a=>a.pts));
   const scored=CONFIG.fights.filter((_,fi)=>RESULTS.fights[fi]&&RESULTS.fights[fi].w).length;
+  const anyPts=arr.some(a=>a.pts>0);
   document.getElementById("kpi").innerHTML=`
-    <div class="box"><div class="lab">Players</div><div class="val">${CONFIG.players.length}</div></div>
-    <div class="box"><div class="lab">Fights done</div><div class="val">${scored}/${CONFIG.fights.length}</div></div>
-    <div class="box"><div class="lab">Leader</div><div class="val">${arr[0]?esc(arr[0].n):"—"}</div></div>
-    <div class="box"><div class="lab">Top score</div><div class="val" style="font-family:var(--mono)">${arr[0]?fmt2(arr[0].pts):"0"}</div></div>`;
+    <div class="box"><div class="lab">Degenerates</div><div class="val">${CONFIG.players.length}</div></div>
+    <div class="box"><div class="lab">Fights in the books</div><div class="val">${scored}/${CONFIG.fights.length}</div></div>
+    <div class="box"><div class="lab">${anyPts?"Current champ":"Leader"}</div><div class="val">${arr[0]?esc(arr[0].n):"—"}</div></div>
+    <div class="box"><div class="lab">Top score</div><div class="val">${arr[0]?fmt2(arr[0].pts):"0"}</div></div>`;
+
   document.getElementById("boardBody").innerHTML=arr.map(o=>{
     const cls=o.rank===1?"p1":o.rank===2?"p2":o.rank===3?"p3":"";
     const w=Math.max(3,(o.pts/max)*100);
-    return `<tr class="${cls}"><td class="rank">${medal(o.rank)}</td><td class="who">${esc(o.n)}</td><td class="barcell"><div class="bar" style="width:${w}%"></div></td><td class="pts">${fmt2(o.pts)}</td></tr>`;
+    const crown=o.rank===1&&o.pts>0?'<span class="crown">👑</span>':"";
+    const q=quipFor(o.rank,arr.length,o.pts);
+    return `<div class="row ${cls}">
+      <div class="rank">${medal(o.rank)}</div>
+      <div class="who">${crown}<span class="name">${esc(o.n)}</span></div>
+      <div class="pts">${fmt2(o.pts)}</div>
+      <div class="barwrap"><div class="bar" style="width:${w}%"></div></div>
+      ${q?`<div class="quip">${q}</div>`:""}
+    </div>`;
   }).join("");
-  // grid
-  const g=document.getElementById("grid");
-  let head=`<tr><th class="fightcol">Fight</th>`+CONFIG.players.map(p=>`<th>${esc(p)}</th>`).join("")+`<th>Result</th></tr>`;
-  let rows=CONFIG.fights.map((f,fi)=>{
+
+  // fight cards
+  document.getElementById("fights").innerHTML=CONFIG.fights.map((f,fi)=>{
     const r=RESULTS.fights[fi]||{};
-    const cells=CONFIG.players.map((_,pi)=>{
+    const N=schedRounds(fi);
+    const ma=multiplier(f.mlA), mb=multiplier(f.mlB);
+    const pickersA=[], pickersB=[];
+    CONFIG.players.forEach((n,pi)=>{
       const pick=CONFIG.picks[pi]&&CONFIG.picks[pi][fi];
-      if(!pick)return `<td class="miss">—</td>`;
-      const name=pick==="a"?f.a:f.b;
-      const correct=r.w&&pick===r.w;
-      const pts=cellPoints(pi,fi);
-      return `<td class="${correct?'hitwin':'miss'}">${esc(name)}${correct?` <span class="miniodds">+${fmt2(pts)}</span>`:""}</td>`;
-    }).join("");
-    let resTxt;
-    if(!r.w){resTxt=`<span class="tbd">TBD</span>`;}
-    else{const wn=r.w==="a"?f.a:f.b;const rd=r.r&&r.r!=="DEC"?`R${r.r}`:"DEC";resTxt=`<span class="res">${esc(wn)} · ${rd}</span>`;}
-    return `<tr><td class="fightcol">${esc(f.a)} vs ${esc(f.b)}</td>${cells}<td>${resTxt}</td></tr>`;
+      if(pick==="a") pickersA.push(pi);
+      else if(pick==="b") pickersB.push(pi);
+    });
+    const chip=(pi,side)=>{
+      const correct=r.w&&r.w===side;
+      const pts=correct?cellPoints(pi,fi):0;
+      return `<span class="chip ${correct?'hit':''}">${esc(CONFIG.players[pi])}${correct?`<span class="p">+${fmt2(pts)}</span>`:""}</span>`;
+    };
+    const sideHTML=(f,ml,mult,side,pickers)=>{
+      const win=r.w&&r.w===side, lose=r.w&&r.w!==side;
+      const belt=win?' <span class="beltwin">🏆</span>':"";
+      return `<div class="side ${win?'win':''} ${lose?'lose':''}">
+        <div class="fname">${esc(side==='a'?f.a:f.b)}${belt}</div>
+        <div class="mult">${mult?('×'+fmt2(mult)):''}${(side==='a'?f.mlA:f.mlB)!=null?` · ${(side==='a'?f.mlA:f.mlB)>0?'+':''}${(side==='a'?f.mlA:f.mlB)}`:''}</div>
+        ${pickers.length?`<div class="chips">${pickers.map(pi=>chip(pi,side)).join("")}</div>`:`<div class="none">nobody 😬</div>`}
+      </div>`;
+    };
+    let res;
+    if(!r.w){ res=`<span class="res tbd">⏳ TBD</span>`; }
+    else{ const wn=r.w==="a"?f.a:f.b; const rd=r.r&&r.r!=="DEC"?`R${r.r}`:"DEC"; const meth=r.method?` ${esc(r.method)}`:""; res=`<span class="res done">✅ ${esc(wn)} · ${rd}${meth}</span>`; }
+    return `<div class="fc">
+      <div class="top"><div class="match">${esc(f.a)} <span style="color:var(--muted)">vs</span> ${esc(f.b)}<span class="rds">${N}R</span></div>${res}</div>
+      <div class="sides">${sideHTML(f,f.mlA,ma,'a',pickersA)}${sideHTML(f,f.mlB,mb,'b',pickersB)}</div>
+    </div>`;
   }).join("");
-  let totals=`<tr><td class="fightcol">TOTAL</td>`+CONFIG.players.map((_,pi)=>`<td class="miniodds" style="font-weight:700;color:var(--ink)">${fmt2(playerTotal(pi))}</td>`).join("")+`<td></td></tr>`;
-  g.innerHTML=head+rows+totals;
+
   const when=RESULTS.generatedAt?new Date(RESULTS.generatedAt):null;
-  document.getElementById("updated").textContent=when?("Updated "+when.toLocaleString()):"Awaiting first update";
+  document.getElementById("updated").textContent=when?("Updated "+when.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})):"Awaiting first update";
+  renderLock();
 }
 
 async function load(){
@@ -160,12 +300,13 @@ async function load(){
   }catch(e){
     const el=document.getElementById("err");
     el.style.display="block";
-    el.textContent="Couldn't load data: "+e.message+". If you're opening this file directly, results load only when served from a web host (that's normal).";
+    el.textContent="Couldn't load data: "+e.message+". (If you opened this file directly, results only load when served from the web.)";
   }
 }
 document.getElementById("refresh").onclick=load;
 load();
-setInterval(load,30000); // auto-refresh every 30s
+setInterval(load,30000);      // refresh data every 30s
+setInterval(renderLock,1000); // tick the countdown every second
 </script>
 </body>
 </html>
