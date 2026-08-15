@@ -249,7 +249,7 @@ function render(){
 
   const arr=standings();
   const max=Math.max(1,...arr.map(a=>a.pts));
-  const scored=CONFIG.fights.filter((_,fi)=>RESULTS.fights[fi]&&RESULTS.fights[fi].w).length;
+  const scored=CONFIG.fights.filter((_,fi)=>{const r=RESULTS.fights[fi];return r&&(r.w||r.done);}).length;
   const anyPts=arr.some(a=>a.pts>0);
   let leaderLab="Leader", leaderVal="TBD, chumps";
   if(anyPts){
@@ -307,7 +307,8 @@ function render(){
       </div>`;
     };
     let res;
-    if(!r.w){ res=`<span class="res tbd">⏳ TBD</span>`; }
+    if(r.done&&!r.w){ const m=r.method&&/draw|no contest/i.test(r.method)?esc(r.method):"Draw"; res=`<span class="res done">🤝 ${m}</span>`; }
+    else if(!r.w){ res=`<span class="res tbd">⏳ TBD</span>`; }
     else{ const wn=r.w==="a"?f.a:f.b; const rd=r.r&&r.r!=="DEC"?`R${r.r}`:"DEC"; const meth=r.method?` ${esc(r.method)}`:""; res=`<span class="res done">✅ ${esc(wn)} · ${rd}${meth}</span>`; }
     return `<div class="fc">
       <div class="top"><div class="match">${esc(f.a)} <span style="color:var(--muted)">vs</span> ${esc(f.b)}<span class="rds">${N}R</span></div>${res}</div>

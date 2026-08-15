@@ -62,8 +62,8 @@
     {
       "a": "Charles Johnson",
       "b": "Eduardo Chapolin",
-      "mlA": 0,
-      "mlB": 0,
+      "mlA": -120,
+      "mlB": 100,
       "rounds": 3
     },
     {

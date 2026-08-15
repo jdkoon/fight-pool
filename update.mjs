@@ -108,17 +108,20 @@ function methodText(comp) {
   }
   return (comp.status?.type?.detail || "").toString();
 }
-// Turn ESPN result into { round, method } where round is "DEC" or "1".."5"
+// Turn ESPN result into { round, method } where round is "DEC" or "1".."5".
+// IMPORTANT: only award a finishing round for an EXPLICIT finish (KO/TKO/Submission).
+// If the method isn't yet known (ESPN often posts the winner a beat before the
+// method detail, leaving only "Final"), we conservatively return DEC so a decision
+// is never briefly scored as a round finish (phantom bonus). It self-corrects to the
+// real round on the next poll once ESPN posts the method.
 function parseFinish(comp) {
   const st = comp.status || {};
   let period = Number(st.period);
   if (!period || isNaN(period)) period = null;
   const method = methodText(comp) || "Final";
-  const isDecision = /decision/i.test(method);
-  const isNoResult = /draw|no contest/i.test(method);
-  if (isDecision || isNoResult) return { round: "DEC", method };
-  if (period && period >= 1 && period <= 5) return { round: String(period), method };
-  // Couldn't read a finish round but it's not a decision — report period unknown
+  const isFinish = /ko\/tko|tko|\bko\b|submission|\bsub\b|technical submission/i.test(method);
+  if (isFinish && period && period >= 1 && period <= 5) return { round: String(period), method };
+  // decision, draw/NC, DQ, or method-not-yet-known => no finish bonus
   return { round: "DEC", method };
 }
 
@@ -159,9 +162,16 @@ function resolveResults(config, comps) {
     // scheduled rounds from ESPN (5 = title/main event, else 3); clamp odd values
     const periods = Number(comp?.format?.regulation?.periods);
     const rounds = periods === 5 ? 5 : 3;
-    if (!completed || (!aW && !bW)) { out[fi] = { w: "", r: "DEC", method: "", conf, rounds }; return; }
+    if (!completed) { out[fi] = { w: "", r: "DEC", method: "", conf, rounds }; return; }
+    if (!aW && !bW) {
+      // completed but nobody won => draw / no contest. Record it as resolved (done)
+      // so the site can show it instead of a permanent "TBD"; nobody scores.
+      const m = methodText(comp) || "Draw";
+      out[fi] = { w: "", r: "DEC", method: m, done: true, conf, rounds };
+      return;
+    }
     const fin = parseFinish(comp);
-    out[fi] = { w: aW ? "a" : "b", r: fin.round, method: fin.method, conf, rounds };
+    out[fi] = { w: aW ? "a" : "b", r: fin.round, method: fin.method, done: true, conf, rounds };
   });
   return { results: out, unmatched };
 }
@@ -229,13 +239,22 @@ async function runOnce(config) {
   const scored = Object.values(results).filter((r) => r.w).length;
   log(`${scored}/${config.fights.length} fights have a winner so far.`);
   if (DRY) { log("(dry run — nothing written or pushed)"); return; }
-  const payload = { generatedAt: new Date().toISOString(), source: "espn", event: config.event, fights: results };
+  // Only rewrite results.json when the actual fight data changed. generatedAt used to
+  // change every run, which made the file churn every poll -> a commit + GitHub Pages
+  // rebuild every 5 min (near the 10 builds/hr soft limit). Now we write only on a
+  // real change, so commits/rebuilds happen only when a result actually moves.
   const before = readResults();
+  let prevFights = null;
+  try { prevFights = JSON.parse(before).fights; } catch { prevFights = null; }
+  const changed = JSON.stringify(prevFights) !== JSON.stringify(results);
+  if (!changed) {
+    log("· results unchanged — not writing (no commit/rebuild)");
+    if (!NO_PUSH) gitPush(); // no-op: nothing staged
+    return;
+  }
+  const payload = { generatedAt: new Date().toISOString(), source: "espn", event: config.event, fights: results };
   writeResults(payload);
-  const after = readResults();
-  // strip generatedAt for change comparison
-  const stripTs = (s) => s.replace(/"generatedAt":\s*"[^"]*"/, "");
-  if (stripTs(before) === stripTs(after)) { log("· results unchanged"); }
+  log("✔ results changed — wrote results.json");
   if (!NO_PUSH) gitPush();
   else log("(--no-push: results.json written, not pushed)");
 }
