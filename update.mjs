@@ -164,8 +164,11 @@ function resolveResults(config, comps) {
     const rounds = periods === 5 ? 5 : 3;
     if (!completed) {
       const o = { w: "", r: "DEC", method: "", conf, rounds };
-      // mark a fight that's happening RIGHT NOW (ESPN state "in") for the LIVE NOW spotlight
-      if (comp.status?.type?.state === "in") { o.live = true; o.liveRound = Number(comp.status?.period) || 1; }
+      // mark a fight that's happening RIGHT NOW (ESPN state "in") for the LIVE NOW spotlight.
+      // NOTE: we deliberately do NOT record the live round — the round changed every ~5 min,
+      // and each change = a commit + Pages rebuild, which could push past the 10-builds/hour
+      // soft limit during a busy prelim hour. Just the live flag keeps it to ~2 commits/fight.
+      if (comp.status?.type?.state === "in") { o.live = true; }
       out[fi] = o; return;
     }
     if (!aW && !bW) {
