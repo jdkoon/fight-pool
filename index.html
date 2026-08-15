@@ -137,6 +137,15 @@
   table.grid tbody tr:last-child td{border-bottom:none}
   .gridnote{color:var(--muted);font-size:11px;text-align:center;margin:8px 2px 0}
 
+  /* ringside announcer */
+  .announcer{margin:14px 0 2px;padding:12px 14px;border-radius:14px;
+    background:linear-gradient(90deg,rgba(255,59,59,.13),rgba(255,206,70,.10));border:1px solid #3a2a2a}
+  .announcer .onair{display:inline-flex;align-items:center;gap:6px;font-family:var(--disp);
+    letter-spacing:1.5px;font-size:12px;color:#ff8a8a;margin-bottom:5px}
+  .announcer .onair .rd{width:8px;height:8px;border-radius:50%;background:#ff3b3b;box-shadow:0 0 8px #ff3b3b;animation:pulse 1.4s infinite}
+  .announcer .say{font-size:14px;line-height:1.5;color:var(--ink)}
+  .announcer .say b{color:#fff}
+
   /* cooler of the night */
   .cooler{margin:12px 0;padding:11px 14px;border-radius:14px;text-align:center;
     background:linear-gradient(90deg,rgba(74,163,255,.16),rgba(255,59,59,.10));border:1px solid #2a3550}
@@ -178,6 +187,8 @@
 
   <div class="kpi" id="kpi"></div>
   <div class="cooler" id="cooler" style="display:none"></div>
+
+  <div class="announcer" id="announcer"></div>
 
   <h2 class="sec"><span class="em">👑</span> THE PECKING ORDER</h2>
   <div class="board" id="boardBody"></div>
@@ -260,6 +271,34 @@ function methodVerb(r){
   if(/sub/.test(m)) return "taps out";
   if(/ko/.test(m)) return "starches";
   return "outpoints";
+}
+// ringside announcer — live trash-talk breakdown driven by current standings + results
+function announce(arr,scored,total){
+  if(!arr.length) return "";
+  const leader=arr[0], last=arr[arr.length-1];
+  const remaining=total-scored;
+  const lt=lockTime(); const locked=CONFIG.locked||(lt&&new Date()>=lt);
+  if(scored===0){
+    return locked
+      ? `Gloves are laced and the picks are <b>LOCKED</b> — no takebacks now. ${total} fights, ${arr.length} bozos, one belt. Nine of you are about to be very, very wrong. 🥊`
+      : `Picks are still trickling in. Get 'em locked before the cage door slams — chalk-huggers and lunatics alike.`;
+  }
+  const tiedTop=arr.filter(a=>Math.abs(a.pts-leader.pts)<1e-9);
+  if(remaining===0){
+    const champLine = tiedTop.length>1
+      ? `We've got CO-CHAMPS?! ${tiedTop.map(a=>esc(a.n)).join(" & ")} split the belt at ${fmt2(leader.pts)}.`
+      : `Your undisputed champ: <b>${esc(leader.n)}</b> at ${fmt2(leader.pts)}.`;
+    return `THAT'S THE CARD. ${champLine} ${esc(last.n)} leaves with nothing but shame (${fmt2(last.pts)}). Pay up, bozos. 🏆`;
+  }
+  let s=`<b>${scored}</b> in the books, <b>${remaining}</b> to go. `;
+  if(tiedTop.length>1){
+    s+=`Logjam up top — ${tiedTop.map(a=>esc(a.n)).join(" & ")} deadlocked at ${fmt2(leader.pts)}. Somebody land a haymaker. `;
+  }else{
+    const gap=leader.pts-arr[1].pts;
+    s+=`<b>${esc(leader.n)}</b> is running the show at ${fmt2(leader.pts)}${gap>=3?`, a comfy ${fmt2(gap)} clear of the pack`:` with ${esc(arr[1].n)} breathing down his neck (${fmt2(arr[1].pts)})`}. `;
+  }
+  s+= last.pts<=0 ? `Down at the bottom, ${esc(last.n)} still hasn't landed a thing — woof. 🐕` : `Meanwhile ${esc(last.n)} is faceplanting at ${fmt2(last.pts)}.`;
+  return s;
 }
 // confetti burst when the lead changes hands
 let prevLeader=null;
@@ -348,6 +387,10 @@ function render(){
       ${q?`<div class="quip">${q}</div>`:""}
     </div>`;
   }).join("");
+
+  // ringside announcer (updates every refresh as fights resolve)
+  document.getElementById("announcer").innerHTML=
+    `<div class="onair"><span class="rd"></span> 🎙️ RINGSIDE MIC</div><div class="say">${announce(arr,scored,CONFIG.fights.length)}</div>`;
 
   // cooler of the night (worst active player)
   const coolerEl=document.getElementById("cooler");
