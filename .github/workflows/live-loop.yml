@@ -1,0 +1,23 @@
+name: Live loop
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: fight-pool-writer
+  cancel-in-progress: true
+jobs:
+  loop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Configure git identity
+        run: |
+          git config user.name "fight-pool-bot"
+          git config user.email "actions@users.noreply.github.com"
+      - name: Live loop — pull ESPN every 2 min, commit+push on change
+        run: node update.mjs --loop --every 120

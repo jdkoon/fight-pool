@@ -1,12 +1,15 @@
 name: Update fight results
 on:
-  schedule:
-    # every 6 minutes = max 10 runs/hour, at/under GitHub Pages' 10-builds/hour soft limit.
-    # (Most runs commit nothing thanks to write-only-on-change, so real rebuilds stay well under.)
-    - cron: "*/6 * * * *"
+  # Cron disabled during the event — GitHub throttles scheduled runs to every 20-50 min,
+  # too slow for a live card. The "Live loop" workflow is the live driver tonight.
+  # Kept as a manual one-shot backup (Run workflow button). Re-add the schedule after
+  # the event if you want passive polling again.
   workflow_dispatch:
 permissions:
   contents: write
+concurrency:
+  group: fight-pool-writer
+  cancel-in-progress: false
 jobs:
   update:
     runs-on: ubuntu-latest
