@@ -162,7 +162,12 @@ function resolveResults(config, comps) {
     // scheduled rounds from ESPN (5 = title/main event, else 3); clamp odd values
     const periods = Number(comp?.format?.regulation?.periods);
     const rounds = periods === 5 ? 5 : 3;
-    if (!completed) { out[fi] = { w: "", r: "DEC", method: "", conf, rounds }; return; }
+    if (!completed) {
+      const o = { w: "", r: "DEC", method: "", conf, rounds };
+      // mark a fight that's happening RIGHT NOW (ESPN state "in") for the LIVE NOW spotlight
+      if (comp.status?.type?.state === "in") { o.live = true; o.liveRound = Number(comp.status?.period) || 1; }
+      out[fi] = o; return;
+    }
     if (!aW && !bW) {
       // completed but nobody won => draw / no contest. Record it as resolved (done)
       // so the site can show it instead of a permanent "TBD"; nobody scores.

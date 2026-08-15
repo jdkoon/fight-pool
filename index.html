@@ -138,6 +138,23 @@
   table.grid tbody tr:last-child td{border-bottom:none}
   .gridnote{color:var(--muted);font-size:11px;text-align:center;margin:8px 2px 0}
 
+  /* LIVE NOW spotlight */
+  .livenow{margin:12px 0;padding:12px 14px;border-radius:14px;
+    background:linear-gradient(90deg,rgba(255,59,59,.20),rgba(255,59,59,.05));border:1px solid #6b2b2b}
+  .livenow .hd{display:inline-flex;align-items:center;gap:7px;font-family:var(--disp);letter-spacing:1px;font-size:16px;color:#ff7a7a}
+  .livenow .hd .rd{width:9px;height:9px;border-radius:50%;background:#ff3b3b;box-shadow:0 0 10px #ff3b3b;animation:pulse 1s infinite}
+  .livenow .match{font-weight:800;color:#fff;font-size:15px;margin:5px 0 6px}
+  .livenow .riders{font-size:12px;color:var(--muted);line-height:1.6}
+  .livenow .riders b{color:var(--ink)}
+
+  /* momentum movers + streak badges */
+  .row .mv{font-size:11px;font-weight:800;margin-left:6px;font-family:var(--mono)}
+  .row .mv.up{color:#37e08b}
+  .row .mv.dn{color:#ff6a6a}
+  .row .stk{font-size:11px;font-weight:800;margin-left:6px}
+  .row .stk.hot{color:#ffb055}
+  .row .stk.cold{color:#8fc7ff}
+
   /* ringside announcer */
   .announcer{margin:14px 0 2px;padding:12px 14px;border-radius:14px;
     background:linear-gradient(90deg,rgba(255,59,59,.13),rgba(255,206,70,.10));border:1px solid #3a2a2a}
@@ -184,6 +201,7 @@
   </div>
 
   <div class="lock" id="lock" style="display:none"></div>
+  <div class="livenow" id="livenow" style="display:none"></div>
   <div class="err" id="err"></div>
 
   <div class="kpi" id="kpi"></div>
@@ -301,6 +319,27 @@ function announce(arr,scored,total){
   s+= last.pts<=0 ? `Down at the bottom, ${esc(last.n)} still hasn't landed a thing — woof. 🐕` : `Meanwhile ${esc(last.n)} is faceplanting at ${fmt2(last.pts)}.`;
   return s;
 }
+// current run of correct/incorrect picks for a player (most-recent trailing streak).
+// resolved decided fights ordered ~chronologically: prelims (high index) first, main event (index 0) last.
+function streakFor(pi){
+  const seq=[];
+  for(let fi=CONFIG.fights.length-1; fi>=0; fi--){
+    const r=RESULTS.fights[fi];
+    if(r&&r.w){ const pk=CONFIG.picks[pi]&&CONFIG.picks[pi][fi]; if(pk) seq.push(pk===r.w); }
+  }
+  if(!seq.length) return null;
+  const last=seq[seq.length-1]; let n=1;
+  for(let k=seq.length-2;k>=0;k--){ if(seq[k]===last) n++; else break; }
+  if(n<2) return null;
+  return { type: last?'hot':'cold', n };
+}
+function streakBadge(pi){
+  const s=streakFor(pi); if(!s) return "";
+  return s.type==='hot' ? `<span class="stk hot">🔥${s.n}</span>` : `<span class="stk cold">🧊${s.n}</span>`;
+}
+
+// rank snapshots per fights-resolved count, for momentum arrows
+const RANK_SNAPS={};
 // confetti burst when the lead changes hands
 let prevLeader=null;
 function confettiBurst(){
@@ -372,22 +411,43 @@ function render(){
     <div class="box"><div class="lab">${leaderLab}</div><div class="val">${leaderVal}</div></div>
     <div class="box"><div class="lab">Top score</div><div class="val">${arr[0]?fmt2(arr[0].pts):"0"}</div></div>`;
 
+  // momentum: snapshot ranks per resolved-count, compare to the most recent prior snapshot
+  const curRanks={}; arr.forEach(o=>{curRanks[o.i]=o.rank;});
+  if(!(scored in RANK_SNAPS)) RANK_SNAPS[scored]=curRanks;
+  let moveBase=null; { const ks=Object.keys(RANK_SNAPS).map(Number).filter(k=>k<scored); if(ks.length) moveBase=RANK_SNAPS[Math.max(...ks)]; }
   document.getElementById("boardBody").innerHTML=arr.map(o=>{
     const cls=anyPts?(o.rank===1?"p1":o.rank===2?"p2":o.rank===3?"p3":""):"";
     const w=Math.max(3,(o.pts/max)*100);
     const crown=anyPts&&o.rank===1&&o.pts>0?'<span class="crown">👑</span>':"";
     const q=anyPts?rankTitle(o.rank,o.pts):"";
     const rankDisp=anyPts?medal(o.rank):o.rank;
+    let mv=""; if(anyPts&&moveBase&&moveBase[o.i]!=null){ const d=moveBase[o.i]-o.rank; mv=d>0?`<span class="mv up">▲${d}</span>`:d<0?`<span class="mv dn">▼${-d}</span>`:""; }
+    const stk=anyPts?streakBadge(o.i):"";
     return `<div class="row ${cls}">
       <div class="line1">
         <div class="rank">${rankDisp}</div>
-        <div class="who">${crown}<span class="name">${esc(o.n)}</span></div>
+        <div class="who">${crown}<span class="name">${esc(o.n)}</span>${mv}${stk}</div>
         <div class="pts">${fmt2(o.pts)}</div>
       </div>
       <div class="barwrap"><div class="bar" style="width:${w}%"></div></div>
       ${q?`<div class="quip">${q}</div>`:""}
     </div>`;
   }).join("");
+
+  // 🔴 LIVE NOW spotlight — a fight happening in the cage right now
+  const liveEl=document.getElementById("livenow");
+  const liveFights=CONFIG.fights.map((f,fi)=>({f,fi,r:RESULTS.fights[fi]})).filter(x=>x.r&&x.r.live&&!x.r.w);
+  if(liveFights.length){
+    liveEl.style.display="block";
+    const ln=s=>esc(String(s).split(" ").slice(-1)[0]);
+    liveEl.innerHTML=liveFights.map(({f,fi,r})=>{
+      const rd=r.liveRound?`ROUND ${r.liveRound}`:"LIVE";
+      const A=[],B=[]; CONFIG.players.forEach((n,pi)=>{const pk=CONFIG.picks[pi]&&CONFIG.picks[pi][fi]; if(pk==="a")A.push(esc(n)); else if(pk==="b")B.push(esc(n));});
+      return `<div class="hd"><span class="rd"></span> 🔴 LIVE NOW · ${esc(rd)}</div>
+        <div class="match">${esc(f.a)} vs ${esc(f.b)}</div>
+        <div class="riders">Riding <b>${ln(f.a)}</b>: ${A.join(", ")||"nobody 😬"}<br>Riding <b>${ln(f.b)}</b>: ${B.join(", ")||"nobody 😬"}</div>`;
+    }).join("");
+  } else { liveEl.style.display="none"; }
 
   // ringside announcer (updates every refresh as fights resolve)
   document.getElementById("announcer").innerHTML=
