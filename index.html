@@ -228,7 +228,7 @@ function render(){
   const max=Math.max(1,...arr.map(a=>a.pts));
   const scored=CONFIG.fights.filter((_,fi)=>RESULTS.fights[fi]&&RESULTS.fights[fi].w).length;
   const anyPts=arr.some(a=>a.pts>0);
-  let leaderLab="Leader", leaderVal="The J's";
+  let leaderLab="Leader", leaderVal="TBD, chumps";
   if(anyPts){
     const top=arr[0].pts;
     const tied=arr.filter(a=>Math.abs(a.pts-top)<1e-9);

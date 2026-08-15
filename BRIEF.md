@@ -64,7 +64,7 @@ Tyler, Ian, Bobby, Logan, Nick, John, Diaz, Ben, Matt, Gerry.
 12. Jeremiah Wells (+600) vs Myktybek Orolbai (-900) — 3R
 
 ## Status / TODO
-- [x] Scoreboard hosted, mobile, styled; leader tile: "The J's" pre-scoring, "Logjam (n)" on a tie, else champ name.
+- [x] Scoreboard hosted, mobile, styled; leader tile: "TBD, chumps" pre-scoring, "Logjam (n)" on a tie, else champ name.
 - [x] Google Form built + published (anyone with link) + responses sheet linked.
 - [x] Hard 5 PM lock armed (Apps Script trigger).
 - [ ] **At/after 5 PM:** convert form responses → config.json picks (latest pre-deadline per person) → push. Then the "who picked whom" grid + standings populate.
