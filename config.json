@@ -246,5 +246,6 @@
   },
   "maxBonus": 3,
   "lockISO": "2026-08-15T17:00:00-04:00",
-  "formUrl": "https://docs.google.com/forms/d/e/1FAIpQLSeWmsz5VWLvSilIsHYnuDQ9wzpX37rREQBvfBMxmuZPmdiVoA/viewform"
+  "formUrl": "https://docs.google.com/forms/d/e/1FAIpQLSeWmsz5VWLvSilIsHYnuDQ9wzpX37rREQBvfBMxmuZPmdiVoA/viewform",
+  "locked": true
 }

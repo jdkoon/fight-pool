@@ -137,6 +137,25 @@
   table.grid tbody tr:last-child td{border-bottom:none}
   .gridnote{color:var(--muted);font-size:11px;text-align:center;margin:8px 2px 0}
 
+  /* cooler of the night */
+  .cooler{margin:12px 0;padding:11px 14px;border-radius:14px;text-align:center;
+    background:linear-gradient(90deg,rgba(74,163,255,.16),rgba(255,59,59,.10));border:1px solid #2a3550}
+  .cooler .lab{font-family:var(--disp);letter-spacing:1.5px;font-size:16px;color:#9fc3ff}
+  .cooler .who{font-weight:800;color:#fff;font-size:15px;margin-top:1px}
+  .cooler .ins{display:block;font-size:12px;color:var(--muted);margin-top:1px;font-style:italic}
+
+  /* live cage feed */
+  .feed{display:flex;flex-direction:column;gap:8px}
+  .feed .fi{background:linear-gradient(180deg,var(--panel),#101018);border:1px solid var(--line);
+    border-radius:12px;padding:9px 12px;font-size:13px;line-height:1.4}
+  .feed .fi.up{border-color:#7a5a12;background:linear-gradient(180deg,#221b0a,#12100a)}
+  .feed .none{color:var(--muted);font-size:12px;text-align:center;padding:12px}
+
+  /* confetti on lead change */
+  .confetti{position:fixed;top:-16px;width:9px;height:15px;z-index:9999;pointer-events:none;
+    border-radius:2px;animation:cfall linear forwards}
+  @keyframes cfall{to{transform:translateY(110vh) rotate(760deg);opacity:.85}}
+
   .foot{color:var(--muted);font-size:12px;text-align:center;margin-top:26px;line-height:1.6}
   .err{background:#3a1c1c;border:1px solid #6b2b2b;color:#f0b4b4;padding:12px 14px;border-radius:12px;margin:12px 0;display:none}
 </style>
@@ -158,9 +177,13 @@
   <div class="err" id="err"></div>
 
   <div class="kpi" id="kpi"></div>
+  <div class="cooler" id="cooler" style="display:none"></div>
 
   <h2 class="sec"><span class="em">👑</span> THE PECKING ORDER</h2>
   <div class="board" id="boardBody"></div>
+
+  <h2 class="sec"><span class="em">📢</span> LIVE FROM THE CAGE</h2>
+  <div class="feed" id="feed"></div>
 
   <h2 class="sec"><span class="em">🥊</span> TALE OF THE TAPE</h2>
   <div class="fights" id="fights"></div>
@@ -205,22 +228,52 @@ const TAGLINES=[
   "Fortune favors the degenerate.",
   "Everyone's a genius until the cage door shuts."
 ];
-// 10-tier ladder, rank 1 (belt) down to rank 10 (curtain jerker)
+// 10-tier trash-talk ladder, rank 1 (belt) down to rank 10 (dogshit)
 const RANK_TITLES=[
   "👑 Undisputed Champ",
-  "🥇 #1 Contender",
-  "🎯 One Win From The Belt",
-  "🔪 Ranked Killer",
-  "🚪 Gatekeeper",
-  "🥊 Mid-Card Regular",
-  "🧳 Journeyman",
-  "🥫 Tomato Can",
-  "🩹 Enhancement Talent",
-  "🤡 Curtain Jerker"
+  "🥊 #1 Contender",
+  "🎯 Smells the Belt",
+  "🔪 Stone-Cold Killer",
+  "😤 Sweating Through the Shirt",
+  "😐 Aggressively Mid",
+  "🪣 Bucket Boy",
+  "🧦 Roster Filler",
+  "🚑 Somebody Call a Doctor",
+  "🤡 You're Dogshit"
 ];
 function rankTitle(rank,pts){
-  if(pts<=0) return "🍿 hasn't landed one";     // scored started, still winless
+  if(pts<=0) return "🧊 Stone Cold Zero";        // scoring started, still winless
   return RANK_TITLES[Math.min(Math.max(rank,1),10)-1] || "";
+}
+// Cooler-of-the-night insults (rotates through the night)
+const COOLER_LINES=[
+  "a truly historic collapse.",
+  "currently buying everyone's beer.",
+  "aggressively bad at this.",
+  "should've just picked chalk.",
+  "the reason we play for money.",
+  "getting lapped by a coin flip.",
+  "please clap. 🫠"
+];
+function methodVerb(r){
+  const m=(r.method||"").toLowerCase();
+  if(/sub/.test(m)) return "taps out";
+  if(/ko/.test(m)) return "starches";
+  return "outpoints";
+}
+// confetti burst when the lead changes hands
+let prevLeader=null;
+function confettiBurst(){
+  const colors=["#ffce46","#ff3b3b","#37e08b","#4aa3ff","#ffffff"];
+  for(let i=0;i<44;i++){
+    const d=document.createElement("div"); d.className="confetti";
+    d.style.left=(Math.random()*100)+"vw";
+    d.style.background=colors[i%colors.length];
+    d.style.animationDuration=(1.5+Math.random()*1.6)+"s";
+    d.style.transform="rotate("+(Math.random()*360)+"deg)";
+    document.body.appendChild(d);
+    setTimeout(()=>d.remove(),3400);
+  }
 }
 
 function standings(){
@@ -236,15 +289,16 @@ function lockTime(){ return CONFIG.lockISO ? new Date(CONFIG.lockISO) : null; }
 function renderLock(){
   const el=document.getElementById("lock");
   const t=lockTime();
-  if(!t){ el.style.display="none"; return; }
-  el.style.display="block";
   const now=new Date();
   const formUrl=CONFIG.formUrl||"";
-  if(now>=t){
+  if(CONFIG.locked || (t && now>=t)){
+    el.style.display="block";
     el.className="lock locked";
     el.innerHTML=`<div class="big">🔒 PICKS ARE LOCKED</div><div style="color:var(--muted);font-size:13px;margin-top:2px">No takebacks. Live and die by 'em.</div>`;
     return;
   }
+  if(!t){ el.style.display="none"; return; }
+  el.style.display="block";
   let ms=t-now, s=Math.floor(ms/1000);
   const d=Math.floor(s/86400); s-=d*86400;
   const h=Math.floor(s/3600); s-=h*3600;
@@ -273,7 +327,7 @@ function render(){
     else { leaderLab="Current champ"; leaderVal=esc(arr[0].n); }
   }
   document.getElementById("kpi").innerHTML=`
-    <div class="box"><div class="lab">Degenerates</div><div class="val">${CONFIG.players.length}</div></div>
+    <div class="box"><div class="lab">Bozos</div><div class="val">${CONFIG.players.length}</div></div>
     <div class="box"><div class="lab">Fights in the books</div><div class="val">${scored}/${CONFIG.fights.length}</div></div>
     <div class="box"><div class="lab">${leaderLab}</div><div class="val">${leaderVal}</div></div>
     <div class="box"><div class="lab">Top score</div><div class="val">${arr[0]?fmt2(arr[0].pts):"0"}</div></div>`;
@@ -294,6 +348,37 @@ function render(){
       ${q?`<div class="quip">${q}</div>`:""}
     </div>`;
   }).join("");
+
+  // cooler of the night (worst active player)
+  const coolerEl=document.getElementById("cooler");
+  if(anyPts && arr.length){
+    const loser=arr[arr.length-1];
+    coolerEl.style.display="block";
+    coolerEl.innerHTML=`<div class="lab">🧊 COOLER OF THE NIGHT</div><div class="who">${esc(loser.n)} — ${fmt2(loser.pts)}</div><span class="ins">${COOLER_LINES[scored%COOLER_LINES.length]}</span>`;
+  } else { coolerEl.style.display="none"; }
+
+  // live-from-the-cage feed (one punchy line per resolved fight)
+  const resolved=CONFIG.fights.map((f,fi)=>({f,fi,r:RESULTS.fights[fi]})).filter(x=>x.r&&(x.r.w||x.r.done));
+  const feedEl=document.getElementById("feed");
+  if(!resolved.length){
+    feedEl.innerHTML=`<div class="none">No results yet — first bell hasn't rung. 🔔</div>`;
+  } else {
+    feedEl.innerHTML=resolved.map(({f,fi,r})=>{
+      if(r.done&&!r.w) return `<div class="fi">🤝 <b>${esc(f.a)}</b> vs <b>${esc(f.b)}</b> — DRAW. Everyone who bet it eats a zero.</div>`;
+      const wname=r.w==="a"?f.a:f.b, lname=r.w==="a"?f.b:f.a;
+      const wml=r.w==="a"?f.mlA:f.mlB, upset=Number(wml)>0;
+      let nC=0,nW=0; CONFIG.players.forEach((p,pi)=>{const pk=CONFIG.picks[pi]&&CONFIG.picks[pi][fi]; if(!pk)return; pk===r.w?nC++:nW++;});
+      const rd=r.r&&r.r!=="DEC"?` in R${r.r}`:" by decision";
+      return `<div class="fi ${upset?'up':''}">${upset?'🚨 <b>UPSET:</b> ':'✅ '}${esc(wname)} ${methodVerb(r)} ${esc(lname)}${rd}. <b>${nC}</b> nailed it, <b>${nW}</b> got cooked.</div>`;
+    }).join("");
+  }
+
+  // confetti when the lead changes hands
+  if(anyPts && arr.length){
+    const lead=arr[0].n;
+    if(prevLeader!==null && prevLeader!==lead) confettiBurst();
+    prevLeader=lead;
+  }
 
   // fight cards
   document.getElementById("fights").innerHTML=CONFIG.fights.map((f,fi)=>{
