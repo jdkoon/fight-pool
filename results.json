@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-15T23:35:34.710Z",
+  "generatedAt": "2026-08-15T23:55:35.247Z",
   "source": "espn",
   "event": "UFC 330 — Makhachev vs. Machado Garry",
   "fights": {
@@ -50,15 +50,16 @@
       "r": "DEC",
       "method": "",
       "conf": 95,
-      "rounds": 3
-    },
-    "7": {
-      "w": "",
-      "r": "DEC",
-      "method": "",
-      "conf": 95,
       "rounds": 3,
       "live": true
+    },
+    "7": {
+      "w": "a",
+      "r": "1",
+      "method": "Kotko",
+      "done": true,
+      "conf": 95,
+      "rounds": 3
     },
     "8": {
       "w": "b",
