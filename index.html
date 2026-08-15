@@ -116,6 +116,25 @@
   .side .none{font-size:11px;color:var(--muted);opacity:.6;margin-top:7px}
   .beltwin{font-size:11px}
 
+  /* picks grid (the slips) */
+  .gridwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:14px;
+    background:linear-gradient(180deg,var(--panel),#101018)}
+  table.grid{border-collapse:separate;border-spacing:0;width:100%;font-size:12px}
+  table.grid th,table.grid td{padding:7px 9px;text-align:center;white-space:nowrap;border-bottom:1px solid var(--line)}
+  table.grid thead th{position:sticky;top:0;background:#181822;color:var(--muted);font-weight:800;
+    font-size:13px;font-family:var(--disp);letter-spacing:.5px;z-index:2}
+  table.grid thead th .fsub{display:block;font-size:9px;font-weight:600;font-family:var(--body);color:#7b8196;letter-spacing:0;margin-top:1px}
+  table.grid th.pcorner,table.grid td.pname{position:sticky;left:0;background:#181822;text-align:left;
+    font-weight:800;color:var(--ink);z-index:1;border-right:1px solid var(--line)}
+  table.grid thead th.pcorner{z-index:3}
+  table.grid td.cell{color:var(--ink)}
+  table.grid td.hit{color:#8ff0b6;font-weight:800;background:#0f2c1c}
+  table.grid td.hit .cpts{display:block;font-family:var(--mono);font-size:9px;color:#57e08a;font-weight:700}
+  table.grid td.miss{color:var(--muted);opacity:.5}
+  table.grid td.empty{color:var(--muted);opacity:.4}
+  table.grid tbody tr:last-child td{border-bottom:none}
+  .gridnote{color:var(--muted);font-size:11px;text-align:center;margin:8px 2px 0}
+
   .foot{color:var(--muted);font-size:12px;text-align:center;margin-top:26px;line-height:1.6}
   .err{background:#3a1c1c;border:1px solid #6b2b2b;color:#f0b4b4;padding:12px 14px;border-radius:12px;margin:12px 0;display:none}
 </style>
@@ -143,6 +162,9 @@
 
   <h2 class="sec"><span class="em">🥊</span> TALE OF THE TAPE</h2>
   <div class="fights" id="fights"></div>
+
+  <h2 class="sec"><span class="em">📋</span> THE SLIPS</h2>
+  <div id="picksGrid"></div>
 
   <div class="foot" id="foot">
     Live results yanked straight off ESPN · scoring is odds-weighted (underdogs pay, early finishes pay more)<br>
@@ -291,6 +313,34 @@ function render(){
       <div class="sides">${sideHTML(f,f.mlA,ma,'a',pickersA)}${sideHTML(f,f.mlB,mb,'b',pickersB)}</div>
     </div>`;
   }).join("");
+
+  // ===== the slips: everyone's picks grid =====
+  const gridEl=document.getElementById("picksGrid");
+  const lastName=full=>{const p=String(full||"").trim().split(/\s+/);return p[p.length-1]||"—";};
+  const anyPicks=CONFIG.players.some((_,pi)=>CONFIG.picks[pi]&&Object.keys(CONFIG.picks[pi]).length);
+  if(!anyPicks){
+    gridEl.innerHTML=`<div class="gridnote" style="padding:18px 12px;font-size:13px">📋 Everyone's slips drop in here the second picks lock — 5:00 PM ET. 🔒</div>`;
+  }else{
+    const head=`<th class="pcorner">Player</th>`+CONFIG.fights.map((f,fi)=>
+      `<th>${fi+1}<span class="fsub">${esc(lastName(f.a))}/${esc(lastName(f.b))}</span></th>`).join("");
+    const body=arr.map(o=>{
+      const pi=o.i;
+      const cells=CONFIG.fights.map((f,fi)=>{
+        const pick=CONFIG.picks[pi]&&CONFIG.picks[pi][fi];
+        if(!pick) return `<td class="empty">—</td>`;
+        const nm=esc(lastName(pick==="a"?f.a:f.b));
+        const r=RESULTS.fights[fi];
+        if(r&&r.w){
+          if(r.w===pick) return `<td class="hit">${nm}<span class="cpts">+${fmt2(cellPoints(pi,fi))}</span></td>`;
+          return `<td class="miss">${nm}</td>`;
+        }
+        return `<td class="cell">${nm}</td>`;
+      }).join("");
+      return `<tr><td class="pname">${esc(o.n)}</td>${cells}</tr>`;
+    }).join("");
+    gridEl.innerHTML=`<div class="gridwrap"><table class="grid"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`+
+      `<div class="gridnote">← scroll for all ${CONFIG.fights.length} fights · <span style="color:#8ff0b6">green</span> = called it right</div>`;
+  }
 
   const when=RESULTS.generatedAt?new Date(RESULTS.generatedAt):null;
   document.getElementById("updated").textContent=when?("Updated "+when.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})):"Awaiting first update";
