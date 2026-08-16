@@ -275,15 +275,27 @@ function rankTitle(rank,pts){
   if(pts<=0) return "🧊 Stone Cold Zero";        // scoring started, still winless
   return RANK_TITLES[Math.min(Math.max(rank,1),10)-1] || "";
 }
-// Cooler-of-the-night insults (rotates through the night)
+// Cooler-of-the-night roasts (rotate every refresh)
 const COOLER_LINES=[
-  "a truly historic collapse.",
-  "currently buying everyone's beer.",
-  "aggressively bad at this.",
-  "should've just picked chalk.",
-  "the reason we play for money.",
-  "getting lapped by a coin flip.",
-  "please clap. 🫠"
+  "a truly historic collapse — scholars will study this tape.",
+  "currently buying everyone's beer AND their dignity back.",
+  "so ice cold you could store vaccines on this card.",
+  "getting outscored by a Magic 8-Ball with a cracked window.",
+  "putting on a masterclass in how NOT to do this.",
+  "one more bad pick from just turning the TV off and going to bed.",
+  "aggressively, confidently, spectacularly wrong all night.",
+  "the reason the rest of these clowns feel good about themselves.",
+  "still hunting for a single correct opinion. The search continues.",
+  "picking fights like they owe money to the favorites.",
+  "colder than the beer they're about to buy the winner. 🧊"
+];
+// extra-brutal pool for someone still on a big fat zero
+const COOLER_ZERO=[
+  "a perfect, pristine <b>0.00</b> — hang it in the Louvre of failure.",
+  "yet to be right about a single thing. Did you pick with your eyes closed?",
+  "batting a clean .000 — statistically remarkable, spiritually devastating.",
+  "riding a goose egg while the fights happen WITHOUT them.",
+  "somehow scoreless. The card is being contested; they are merely attending."
 ];
 function methodVerb(r){
   const m=(r.method||"").toLowerCase();
@@ -524,7 +536,9 @@ function render(){
   if(anyPts && arr.length){
     const loser=arr[arr.length-1];
     coolerEl.style.display="block";
-    coolerEl.innerHTML=`<div class="lab">🧊 COOLER OF THE NIGHT</div><div class="who">${esc(loser.n)} — ${fmt2(loser.pts)}</div><span class="ins">${COOLER_LINES[scored%COOLER_LINES.length]}</span>`;
+    const cpool = loser.pts<=0 ? COOLER_ZERO : COOLER_LINES;
+    const cline = cpool[MIC_TICK % cpool.length];
+    coolerEl.innerHTML=`<div class="lab">🧊 COOLER OF THE NIGHT</div><div class="who">${esc(loser.n)} — ${fmt2(loser.pts)}</div><span class="ins">${esc(loser.n)} is ${cline}</span>`;
   } else { coolerEl.style.display="none"; }
 
   // live-from-the-cage feed (one punchy line per resolved fight)
