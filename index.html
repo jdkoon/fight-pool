@@ -291,33 +291,100 @@ function methodVerb(r){
   if(/ko/.test(m)) return "starches";
   return "outpoints";
 }
-// ringside announcer — live trash-talk breakdown driven by current standings + results
+// ringside announcer — long, rotating, trash-talking play-by-play.
+// MIC_TICK advances every render so the mic says something fresh each refresh.
+let MIC_TICK=0;
 function announce(arr,scored,total){
   if(!arr.length) return "";
+  MIC_TICK++;
+  const t=MIC_TICK;
+  const P=(a,off)=>a[(t+(off||0))%a.length];          // rotating pick from a pool
   const leader=arr[0], last=arr[arr.length-1];
-  const remaining=total-scored;
   const lt=lockTime(); const locked=CONFIG.locked||(lt&&new Date()>=lt);
-  if(scored===0){
-    return locked
-      ? `Gloves are laced and the picks are <b>LOCKED</b> — no takebacks now. ${total} fights, ${arr.length} bozos, one belt. Nine of you are about to be very, very wrong. 🥊`
-      : `Picks are still trickling in. Get 'em locked before the cage door slams — chalk-huggers and lunatics alike.`;
-  }
+  const ln=s=>esc(String(s).split(" ").slice(-1)[0]);  // fighter last name
+  const remaining=total-scored;
   const tiedTop=arr.filter(a=>Math.abs(a.pts-leader.pts)<1e-9);
+
+  // ===== PRE-EVENT =====
+  if(scored===0){
+    if(!locked) return `Picks are still trickling in — lock 'em before the cage door slams, you procrastinating animals. ⏳`;
+    return P([
+      `Welcome to fight night, you beautiful degenerates. ${total} fights, ${arr.length} bozos, one belt — and nine of you are about to get a very public lesson in variance. Pray to whatever gods you picked. 🥊`,
+      `Picks are <b>LOCKED</b>. No takebacks, no takesies, no "I meant to hit the other guy." You live and die by that card now. History will judge you, and so will the group chat.`,
+      `Gloves are laced, the cage is shut, and somewhere one of you rode a stack of chalk favorites and thinks that's a strategy. It's not. It's cowardice with extra steps. Let's fight.`,
+      `${total} fights stand between you and eternal bragging rights. For most of you, they stand between you and buying the next round. Prelims incoming — hold onto something.`,
+      `The lines are frozen, the trash-talk futures are mooning, and exactly one of you clowns walks out a champion. The other nine walk out with excuses and a tab. Here. We. Go.`
+    ]);
+  }
+
+  // ===== POST-EVENT =====
   if(remaining===0){
     const champLine = tiedTop.length>1
-      ? `We've got CO-CHAMPS?! ${tiedTop.map(a=>esc(a.n)).join(" & ")} split the belt at ${fmt2(leader.pts)}.`
-      : `Your undisputed champ: <b>${esc(leader.n)}</b> at ${fmt2(leader.pts)}.`;
-    return `THAT'S THE CARD. ${champLine} ${esc(last.n)} leaves with nothing but shame (${fmt2(last.pts)}). Pay up, bozos. 🏆`;
+      ? `We've got CO-CHAMPS, folks — ${tiedTop.map(a=>esc(a.n)).join(" & ")} split the belt at ${fmt2(leader.pts)}. Share custody of the trophy and sort the beer money yourselves.`
+      : `Your undisputed champion of the evening: <b>${esc(leader.n)}</b> at ${fmt2(leader.pts)}. Bow to the king, bozos.`;
+    const roast = last.pts<=0
+      ? `${esc(last.n)} finishes with a big, beautiful <b>zero</b> — an entire card, not a single correct pick. That's not bad luck, that's a gift.`
+      : P([
+          `${esc(last.n)} limps home dead last at ${fmt2(last.pts)} — a run so ugly it belongs in a true-crime doc.`,
+          `And scraping the bottom: ${esc(last.n)} at ${fmt2(last.pts)}. Collect your participation trophy and your dignity on the way out.`,
+          `${esc(last.n)} takes home last place (${fmt2(last.pts)}) and the eternal shame that comes with it. Wear it well.`
+        ]);
+    return `🔔 THAT'S THE CARD! ${champLine} ${roast} Everybody settle up — screenshots are forever. 🏆`;
   }
-  let s=`<b>${scored}</b> in the books, <b>${remaining}</b> to go. `;
+
+  // ===== MID-EVENT (multi-part, rotating) =====
+  const parts=[];
+  parts.push(P([
+    `${scored} in the books, ${remaining} still to scrap.`,
+    `We're ${scored} down, ${remaining} to go, and the wheels are already coming off some of your cards.`,
+    `${scored} settled, ${remaining} pending — plenty of runway left for your night to detonate.`,
+    `Cageside update: ${scored} done, ${remaining} to fight, tension climbing.`
+  ]));
+
+  // leader situation
   if(tiedTop.length>1){
-    s+=`Logjam up top — ${tiedTop.map(a=>esc(a.n)).join(" & ")} deadlocked at ${fmt2(leader.pts)}. Somebody land a haymaker. `;
+    parts.push(P([
+      `It's a straight-up logjam at the top — ${tiedTop.map(a=>esc(a.n)).join(" & ")} knotted at ${fmt2(leader.pts)}. One belt, multiple egos. Somebody land a haymaker.`,
+      `Dead heat up front: ${tiedTop.map(a=>esc(a.n)).join(" & ")}, both parked on ${fmt2(leader.pts)}. This won't stay friendly.`
+    ]));
   }else{
     const gap=leader.pts-arr[1].pts;
-    s+=`<b>${esc(leader.n)}</b> is running the show at ${fmt2(leader.pts)}${gap>=3?`, a comfy ${fmt2(gap)} clear of the pack`:` with ${esc(arr[1].n)} breathing down his neck (${fmt2(arr[1].pts)})`}. `;
+    parts.push(gap>=4
+      ? P([
+          `<b>${esc(leader.n)}</b> is running away with it at ${fmt2(leader.pts)} — a fat ${fmt2(gap)} clear of ${esc(arr[1].n)}. Somebody check this man's sleeves for aces.`,
+          `<b>${esc(leader.n)}</b> (${fmt2(leader.pts)}) is making it look criminal, ${fmt2(gap)} up on the field. The rest of you are officially playing for second.`
+        ])
+      : P([
+          `<b>${esc(leader.n)}</b> holds the lead at ${fmt2(leader.pts)}, but ${esc(arr[1].n)} is right on the hip at ${fmt2(arr[1].pts)} — one fight flips the whole thing.`,
+          `Tight at the top: <b>${esc(leader.n)}</b> ${fmt2(leader.pts)}, ${esc(arr[1].n)} stalking at ${fmt2(arr[1].pts)}. Do not blink.`
+        ]));
   }
-  s+= last.pts<=0 ? `Down at the bottom, ${esc(last.n)} still hasn't landed a thing — woof. 🐕` : `Meanwhile ${esc(last.n)} is faceplanting at ${fmt2(last.pts)}.`;
-  return s;
+
+  // callback to a specific finished fight (rotates through them)
+  const resolved=CONFIG.fights.map((f,fi)=>({f,fi,r:RESULTS.fights[fi]})).filter(x=>x.r&&x.r.w);
+  if(resolved.length){
+    const {f,fi,r}=resolved[t%resolved.length];
+    const wn=r.w==="a"?f.a:f.b, lnr=r.w==="a"?f.b:f.a;
+    const dog=Number(r.w==="a"?f.mlA:f.mlB)>0;
+    let nC=0,nW=0,winners=[]; CONFIG.players.forEach((n,pi)=>{const pk=CONFIG.picks[pi]&&CONFIG.picks[pi][fi]; if(!pk)return; if(pk===r.w){nC++;winners.push(esc(n));} else nW++;});
+    const how=r.r&&r.r!=="DEC"?`in Round ${r.r}`:`by decision`;
+    parts.push(dog
+      ? `Still buzzing about ${ln(wn)} pulling the upset over ${ln(lnr)} ${how} — ${winners.length?winners.join(", ")+" cashed the longshot":"nobody had the guts"} while ${nW} of you ate it.`
+      : `${ln(wn)} took care of ${ln(lnr)} ${how} like the chalk promised — ${nC} looked like geniuses, ${nW} looked like ${nW===1?"a clown":"clowns"}.`);
+  }
+
+  // bottom-feeder roast
+  parts.push(last.pts<=0
+    ? P([
+        `Meanwhile ${esc(last.n)} still hasn't landed a single point. Are you even watching, or just holding the remote for decoration? 🐕`,
+        `And ${esc(last.n)}? Still a proud, perfect zero. The commitment to being wrong is honestly inspiring.`
+      ])
+    : P([
+        `Down in the pit, ${esc(last.n)} is faceplanting at ${fmt2(last.pts)}. Not mathematically dead yet — just spiritually.`,
+        `${esc(last.n)} is your current Cooler of the Night at ${fmt2(last.pts)}. Get this man a winner before he rage-quits the chat.`
+      ]));
+
+  return parts.join(" ");
 }
 // current run of correct/incorrect picks for a player (most-recent trailing streak).
 // resolved decided fights ordered ~chronologically: prelims (high index) first, main event (index 0) last.

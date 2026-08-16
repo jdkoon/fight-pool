@@ -217,7 +217,14 @@ function gitPush() {
     try { execSync("git diff --cached --quiet", { cwd: __dirname }); log("· no changes to push"); return; }
     catch { /* there are changes */ }
     execSync(`git commit -m "results update ${new Date().toISOString()}"`, { cwd: __dirname, stdio: "ignore" });
-    execSync("git push", { cwd: __dirname, stdio: "ignore" });
+    try {
+      execSync("git push", { cwd: __dirname, stdio: "ignore" });
+    } catch {
+      // remote moved (e.g. a manual edit landed while looping) — rebase on top and retry
+      log("· remote moved, rebasing and retrying push…");
+      execSync("git pull --rebase --autostash", { cwd: __dirname, stdio: "ignore" });
+      execSync("git push", { cwd: __dirname, stdio: "ignore" });
+    }
     log("✔ pushed update to GitHub Pages");
   } catch (e) {
     log("⚠ git push failed:", e.message.split("\n")[0]);
