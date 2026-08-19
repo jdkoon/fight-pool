@@ -224,7 +224,7 @@
   <div class="foot" id="foot">
     Live results yanked straight off ESPN · scoring is odds-weighted (underdogs pay, early finishes pay more)<br>
     May the best degenerate win. 🫡<br>
-    <span style="display:inline-block;margin-top:8px;opacity:.85">Questions about this thing? Reach out to <a href="mailto:jdkoon@outlook.com">jdkoon@outlook.com</a></span>
+    <span style="display:inline-block;margin-top:8px;opacity:.85">Questions about this thing? Reach out to <a href="mailto:jkoon66@gmail.com">jkoon66@gmail.com</a></span>
   </div>
 </div>
 
@@ -305,12 +305,13 @@ function methodVerb(r){
   return "outpoints";
 }
 // ringside announcer — long, rotating, trash-talking play-by-play.
-// MIC_TICK advances every render so the mic says something fresh each refresh.
-let MIC_TICK=0;
+// The mic + cooler rotate on a TIME-based phase (not every render) so each line
+// stays up long enough to read. Bump MIC_PERIOD to slow it further.
+const MIC_PERIOD=90000; // ms each line stays up (~90s)
+function micPhase(){ return Math.floor(Date.now()/MIC_PERIOD); }
 function announce(arr,scored,total){
   if(!arr.length) return "";
-  MIC_TICK++;
-  const t=MIC_TICK;
+  const t=micPhase();
   const P=(a,off)=>a[(t+(off||0))%a.length];          // rotating pick from a pool
   const leader=arr[0], last=arr[arr.length-1];
   const lt=lockTime(); const locked=CONFIG.locked||(lt&&new Date()>=lt);
@@ -538,7 +539,7 @@ function render(){
     const loser=arr[arr.length-1];
     coolerEl.style.display="block";
     const cpool = loser.pts<=0 ? COOLER_ZERO : COOLER_LINES;
-    const cline = cpool[MIC_TICK % cpool.length];
+    const cline = cpool[micPhase() % cpool.length];
     coolerEl.innerHTML=`<div class="lab">🧊 COOLER OF THE NIGHT</div><div class="who">${esc(loser.n)} — ${fmt2(loser.pts)}</div><span class="ins">${esc(loser.n)} is ${cline}</span>`;
   } else { coolerEl.style.display="none"; }
 
