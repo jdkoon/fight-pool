@@ -6,6 +6,10 @@ You enter everyone's picks once. During the event, a script pulls each result
 12 people just watch the standings move at a public link. No server, no API key,
 no monthly cost.
 
+> **Stumbled on this? Have questions?** This was built by jdkoon for a friends' UFC
+> fight pool — one legendary evening of work. If you want to know how it works, how to
+> run your own, or anything else, reach out: **jdkoon@outlook.com**.
+
 ## What's in this folder
 
 | File | What it is |
