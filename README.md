@@ -8,7 +8,9 @@ no monthly cost.
 
 > **Stumbled on this? Have questions?** This was built by jdkoon for a friends' UFC
 > fight pool — one legendary evening of work. If you want to know how it works, how to
-> run your own, or anything else, reach out: **jkoon66@gmail.com**.
+> run your own, or anything else, reach out: **jkoon66@gmail.com** (fair warning — that's my
+> spam inbox and I don't check it much, so if you actually need me, find me on LinkedIn or
+> something. — J, for John).
 
 ## What's in this folder
 
